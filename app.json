@@ -1,0 +1,71 @@
+{
+  "expo": {
+    "name": "Mango",
+    "slug": "mango",
+    "scheme": "mango",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0B0D",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/REEMPLAZAR_CON_EAS_PROJECT_ID"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aure.mango"
+    },
+    "android": {
+      "package": "com.aure.mango",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0B0D",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-sharing",
+      "expo-updates",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0B0D"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#FF9F1C"
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.REEMPLAZAR_CON_IOS_CLIENT_ID"
+        }
+      ],
+      "expo-screen-orientation"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "REEMPLAZAR_CON_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
