@@ -256,3 +256,24 @@ export function spendingInsight(current, previous) {
   const ratio = average > 0 ? current / average : 1;
   return { level: ratio > 1.25 ? 'high' : ratio > 1.1 ? 'warn' : 'ok', ratio, average };
 }
+
+/* ---------- Deudas y préstamos ---------- */
+
+/** Cuánto se devolvió, cuánto falta y si ya está saldada */
+export function debtStatus(d) {
+  const paid = (d.payments ?? []).reduce((s, p) => s + p.amount, 0);
+  const pending = Math.max(0, d.amount - paid);
+  return { paid, pending, done: pending === 0, ratio: d.amount ? Math.min(1, paid / d.amount) : 0 };
+}
+
+/** Totales pendientes por dirección, convertidos con `conv` */
+export function debtTotals(debts, conv) {
+  const t = { owed: 0, owe: 0, owedCount: 0, oweCount: 0 };
+  for (const d of debts) {
+    const { pending } = debtStatus(d);
+    if (!pending) continue;
+    t[d.direction] += conv(pending, d.currency);
+    t[`${d.direction}Count`] += 1;
+  }
+  return t;
+}

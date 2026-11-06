@@ -1,4 +1,6 @@
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteDoc,
   deleteField,
@@ -69,6 +71,7 @@ export function DataProvider({ children }) {
   const [purchases, setPurchases] = useState([]);
   const [recurring, setRecurring] = useState([]);
   const [goals, setGoals] = useState([]);
+  const [debts, setDebts] = useState([]);
   const [loaded, setLoaded] = useState(new Set());
   const seeding = useRef(false);
 
@@ -95,6 +98,11 @@ export function DataProvider({ children }) {
       listen('purchases', setPurchases, (a, b) => b.date.localeCompare(a.date)),
       listen('recurring', setRecurring, (a, b) => a.dayOfMonth - b.dayOfMonth),
       listen('goals', setGoals, (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0)),
+      listen(
+        'debts',
+        setDebts,
+        (a, b) => b.date.localeCompare(a.date) || (b.createdAt ?? 0) - (a.createdAt ?? 0),
+      ),
       onSnapshot(doc(db, 'users', uid), (snap) => {
         setSettings({ ...DEFAULT_SETTINGS, ...(snap.data()?.settings ?? {}) });
         mark('settings');
@@ -248,7 +256,51 @@ export function DataProvider({ children }) {
           for (const n of s.numbers) upd[`paid.${n}`] = deleteField();
           batch.update(docRef('purchases', s.purchaseId), upd);
         }
+      } else if (s.kind === 'debt') {
+        // Borrar el movimiento de una deuda: si era un cobro/pago, se saca de la deuda;
+        // si era el préstamo inicial, la deuda queda como anotación (sin cuenta)
+        const d = debts.find((x) => x.id === s.id);
+        if (!d) return;
+        if (s.paymentId) {
+          const pay = (d.payments ?? []).find((x) => x.id === s.paymentId);
+          if (pay) batch.update(docRef('debts', d.id), { payments: arrayRemove(pay) });
+        } else {
+          batch.update(docRef('debts', d.id), { txId: null, accountId: null });
+        }
       }
+    };
+
+    /**
+     * Movimiento de una deuda. Es una transferencia con "fuera de Mango" del otro lado,
+     * así mueve el saldo de la cuenta sin contar como gasto ni ingreso.
+     *  - Te deben (owed): prestar saca plata de tu cuenta; cobrar la vuelve a entrar.
+     *  - Debés (owe): pedir prestado entra plata; pagar la saca.
+     */
+    const debtTx = (d, { amount, date, accountId, paymentId }) => {
+      const initial = !paymentId;
+      const out = (d.direction === 'owed') === initial;
+      const note = initial
+        ? d.direction === 'owed'
+          ? `Préstamo a ${d.person}`
+          : `Préstamo de ${d.person}`
+        : d.direction === 'owed'
+          ? `Cobro de ${d.person}`
+          : `Pago a ${d.person}`;
+      return {
+        type: 'transfer',
+        amount,
+        currency: d.currency,
+        accountId: out ? accountId : null,
+        toAccountId: out ? null : accountId,
+        toAmount: out ? null : amount,
+        categoryId: null,
+        note,
+        date,
+        rate: null,
+        method: null,
+        source: { kind: 'debt', id: d.id, ...(paymentId ? { paymentId } : {}) },
+        createdAt: Date.now(),
+      };
     };
 
     return {
@@ -263,8 +315,73 @@ export function DataProvider({ children }) {
       purchases,
       recurring,
       goals,
+      debts,
       save,
       remove,
+
+      /** Nueva deuda (y su movimiento, si elegiste cuenta). Devuelve el id. */
+      createDebt: async (data) => {
+        const batch = writeBatch(db);
+        const ref = doc(colRef('debts'));
+        const d = { ...data, id: ref.id };
+        let txId = null;
+        if (data.accountId) {
+          const txRef = doc(colRef('transactions'));
+          batch.set(txRef, debtTx(d, { amount: data.amount, date: data.date, accountId: data.accountId }));
+          txId = txRef.id;
+        }
+        batch.set(ref, { ...data, txId, payments: [], createdAt: Date.now() });
+        await batch.commit();
+        return ref.id;
+      },
+
+      /** Editar una deuda: rehace su movimiento inicial con los datos nuevos */
+      editDebt: async (d, data) => {
+        const batch = writeBatch(db);
+        const next = { ...d, ...data };
+        if (d.txId) batch.delete(docRef('transactions', d.txId));
+        let txId = null;
+        if (next.accountId) {
+          const txRef = doc(colRef('transactions'));
+          batch.set(txRef, debtTx(next, { amount: next.amount, date: next.date, accountId: next.accountId }));
+          txId = txRef.id;
+        }
+        batch.update(docRef('debts', d.id), { ...data, txId });
+        await batch.commit();
+      },
+
+      /** Cobro (te deben) o pago (debés), total o parcial. Devuelve el pago, para poder deshacerlo. */
+      addDebtPayment: async (d, { amount, date, accountId }) => {
+        const batch = writeBatch(db);
+        const paymentId = doc(colRef('debts')).id;
+        let txId = null;
+        if (accountId) {
+          const txRef = doc(colRef('transactions'));
+          batch.set(txRef, debtTx(d, { amount, date, accountId, paymentId }));
+          txId = txRef.id;
+        }
+        const payment = { id: paymentId, amount, date, accountId: accountId ?? null, txId };
+        batch.update(docRef('debts', d.id), { payments: arrayUnion(payment) });
+        await batch.commit();
+        return payment;
+      },
+
+      /** Saca un cobro/pago y borra su movimiento */
+      removeDebtPayment: async (d, payment) => {
+        const batch = writeBatch(db);
+        if (payment.txId) batch.delete(docRef('transactions', payment.txId));
+        batch.update(docRef('debts', d.id), { payments: arrayRemove(payment) });
+        await batch.commit();
+      },
+
+      /** Borra la deuda con todos sus movimientos (el préstamo y los cobros/pagos) */
+      deleteDebt: async (d) => {
+        const batch = writeBatch(db);
+        if (d.txId) batch.delete(docRef('transactions', d.txId));
+        for (const pay of d.payments ?? []) if (pay.txId) batch.delete(docRef('transactions', pay.txId));
+        batch.delete(docRef('debts', d.id));
+        await batch.commit();
+      },
       updateSettings: (s) => setDoc(doc(db, 'users', uid), { settings: s }, { merge: true }),
 
       deleteTransaction: async (tx) => {
@@ -300,7 +417,7 @@ export function DataProvider({ children }) {
       contributeGoal: (g, amount) =>
         updateDoc(docRef('goals', g.id), { saved: Math.max(0, (g.saved ?? 0) + amount) }),
     };
-  }, [uid, loaded, settings, accounts, categories, transactions, cards, purchases, recurring, goals]);
+  }, [uid, loaded, settings, accounts, categories, transactions, cards, purchases, recurring, goals, debts]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

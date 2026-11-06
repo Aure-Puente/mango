@@ -2,11 +2,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
-import { googleAvailable } from '@/lib/google';
+import { useHandoffTarget } from '@/lib/handoff';
 import { palette, radius, space } from '@/theme';
 import { Logo } from './Logo';
-import { PressableScale } from './ui';
+import { PressableScale, SoftHalo } from './ui';
 
 const HALO = 300;
 
@@ -17,6 +16,7 @@ const HALO = 300;
  */
 export function AuthLayout({ subtitle, children, footer }) {
   const insets = useSafeAreaInsets();
+  const [logoRef, logoVisible] = useHandoffTarget('login');
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: palette.background }}
@@ -33,31 +33,28 @@ export function AuthLayout({ subtitle, children, footer }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.column}>
-          {/* Marca */}
-          <View style={styles.hero}>
-            <View style={styles.halo} pointerEvents="none">
-              <Svg width={HALO} height={HALO} viewBox="0 0 100 100">
-                <Defs>
-                  <RadialGradient id="authHalo" cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
-                    <Stop offset="0" stopColor={palette.primary} stopOpacity={0.16} />
-                    <Stop offset="1" stopColor={palette.primary} stopOpacity={0} />
-                  </RadialGradient>
-                </Defs>
-                <Circle cx="50" cy="50" r="50" fill="url(#authHalo)" />
-              </Svg>
+          {/* Marca + formulario, centrados en el alto disponible: el espacio libre se reparte
+              arriba y abajo en vez de quedar todo junto antes del pie */}
+          <View style={styles.main}>
+            <View style={styles.hero}>
+              <View style={styles.halo} pointerEvents="none">
+                <SoftHalo size={HALO} />
+              </View>
+              {/* Oculto hasta que llega el mango de la splash (ver lib/handoff) */}
+              <View ref={logoRef} collapsable={false} style={{ opacity: logoVisible ? 1 : 0 }}>
+                <Logo size={96} />
+              </View>
+              <Text style={styles.word}>mango</Text>
+              {subtitle ? (
+                <Text variant="bodyMedium" style={styles.subtitle}>
+                  {subtitle}
+                </Text>
+              ) : null}
             </View>
-            <Logo size={96} />
-            <Text style={styles.word}>mango</Text>
-            {subtitle ? (
-              <Text variant="bodyMedium" style={styles.subtitle}>
-                {subtitle}
-              </Text>
-            ) : null}
+
+            <View style={{ gap: space.md }}>{children}</View>
           </View>
 
-          <View style={{ gap: space.md }}>{children}</View>
-
-          <View style={{ flex: 1, minHeight: space.xl }} />
           <View style={{ alignItems: 'center', marginTop: space.xl }}>{footer}</View>
         </View>
       </ScrollView>
@@ -88,7 +85,7 @@ export function GoogleButton({ onPress, loading }) {
       disabled={loading}
       scaleTo={0.97}
       accessibilityRole="button"
-      style={[styles.google, !googleAvailable && { opacity: 0.5 }]}
+      style={styles.google}
     >
       {loading ? (
         <ActivityIndicator size={18} color={palette.background} />
@@ -132,6 +129,8 @@ export function AuthError({ children }) {
 
 const styles = StyleSheet.create({
   column: { width: '100%', maxWidth: 420, alignSelf: 'center', flexGrow: 1 },
+  // Un poco más abajo del centro exacto: el bloque se ve mejor apoyado que flotando arriba
+  main: { flexGrow: 1, justifyContent: 'center', paddingTop: space.xl, paddingBottom: space.lg },
   hero: { alignItems: 'center', marginBottom: space.xxl, paddingTop: space.lg },
   halo: { position: 'absolute', top: 48 - HALO / 2 + space.lg, width: HALO, height: HALO },
   word: {

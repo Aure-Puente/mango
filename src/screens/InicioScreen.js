@@ -22,7 +22,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useFinance } from '@/hooks/useFinance';
 import { useLayout } from '@/hooks/useLayout';
 import { addMonths, currentPeriod, periodLabel } from '@/lib/dates';
-import { accountBalances, spendingByCategory, spendingInsight } from '@/lib/finance';
+import { accountBalances, debtTotals, spendingByCategory, spendingInsight } from '@/lib/finance';
 import { formatMoney, percent } from '@/lib/money';
 import { RATE_LABEL } from '@/lib/rates';
 import { navigate } from '@/navigation/RootNavigation';
@@ -35,7 +35,8 @@ const HERO_MUTED = 'rgba(255,255,255,0.62)';
 export default function Home() {
   const { user } = useAuth();
   const f = useFinance();
-  const { ready, accounts, transactions, categories, goals, settings, market, display, conv, fmt } = f;
+  const { ready, accounts, transactions, categories, goals, debts, settings, market, display, conv, fmt } = f;
+  const dt = debtTotals(debts, conv);
   const [paying, setPaying] = useState(null);
   const period = currentPeriod();
   const { twoCol } = useLayout(true);
@@ -248,6 +249,41 @@ export default function Home() {
                     </Text>
                     <Text variant="labelLarge" style={{ fontVariant: ['tabular-nums'] }}>
                       {formatMoney(market.quote.venta * 100, 'ARS')}
+                    </Text>
+                    <MaterialCommunityIcons name="chevron-right" size={18} color={palette.textDisabled} />
+                  </Pressable>
+                ) : null}
+                {/* Deudas: lo que te deben y lo que debés, en una línea */}
+                {dt.owed || dt.owe ? (
+                  <Pressable
+                    onPress={() => navigate('Deudas', { direction: dt.owed ? 'owed' : 'owe' })}
+                    style={({ pressed }) => [styles.quote, pressed && { opacity: 0.6 }]}
+                  >
+                    <View style={[styles.quoteDot, { backgroundColor: palette.info + '1C' }]}>
+                      <MaterialCommunityIcons name="hand-coin-outline" size={14} color={palette.info} />
+                    </View>
+                    <Text
+                      variant="bodySmall"
+                      style={{ color: palette.textSecondary, flex: 1 }}
+                      numberOfLines={1}
+                    >
+                      {dt.owed ? (
+                        <>
+                          Te deben{' '}
+                          <Text style={{ color: palette.income, fontFamily: 'Inter_600SemiBold' }}>
+                            {fmt(dt.owed, display, { compact: true })}
+                          </Text>
+                        </>
+                      ) : null}
+                      {dt.owed && dt.owe ? '  ·  ' : ''}
+                      {dt.owe ? (
+                        <>
+                          Debés{' '}
+                          <Text style={{ color: palette.text, fontFamily: 'Inter_600SemiBold' }}>
+                            {fmt(dt.owe, display, { compact: true })}
+                          </Text>
+                        </>
+                      ) : null}
                     </Text>
                     <MaterialCommunityIcons name="chevron-right" size={18} color={palette.textDisabled} />
                   </Pressable>

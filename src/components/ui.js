@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Button, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { MAX_FORM, useLayout } from '@/hooks/useLayout';
 import { goBack } from '@/navigation/RootNavigation';
 import { motion, palette, radius, space } from '@/theme';
@@ -368,6 +368,7 @@ export function IconBubble({ icon, color = palette.primary, size = 40 }) {
 export function Row({
   icon,
   iconColor,
+  left, // en lugar del ícono, cualquier cosa (ej: un avatar con iniciales)
   title,
   subtitle,
   right,
@@ -384,7 +385,7 @@ export function Row({
       disabled={!onPress && !onLongPress}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.55 }, dim && { opacity: 0.45 }]}
     >
-      {icon ? <IconBubble icon={icon} color={iconColor} /> : null}
+      {left ?? (icon ? <IconBubble icon={icon} color={iconColor} /> : null)}
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text variant="bodyLarge" numberOfLines={1} style={{ fontFamily: 'Inter_500Medium' }}>
           {title}
@@ -721,3 +722,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+/**
+ * Halo cálido y suave hecho con círculos concéntricos muy transparentes.
+ * (El degradado radial de SVG se ve con anillos de colores en Android.)
+ */
+export function SoftHalo({ size, color = palette.primary, steps = 18, strength = 0.16 }) {
+  const each = strength / steps;
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      {Array.from({ length: steps }, (_, i) => (
+        <Circle key={i} cx="50" cy="50" r={50 - (i * 44) / steps} fill={color} fillOpacity={each} />
+      ))}
+    </Svg>
+  );
+}

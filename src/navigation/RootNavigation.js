@@ -51,6 +51,8 @@ const PATHS = {
   '/metas': 'Metas',
   '/cotizaciones': 'Cotizaciones',
   '/ajustes': 'Ajustes',
+  '/deudas': 'Deudas',
+  '/deuda': 'DeudaDetalle',
 };
 
 export function openUrl(url) {

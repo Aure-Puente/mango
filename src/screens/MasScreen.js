@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useFinance } from '@/hooks/useFinance';
 import { exportTransactionsCsv } from '@/lib/export';
+import { debtTotals } from '@/lib/finance';
 import { navigate } from '@/navigation/RootNavigation';
 import { palette, radius, space } from '@/theme';
 
@@ -21,7 +22,8 @@ function namesSummary(names, max = 2) {
 
 export default function More() {
   const { user } = useAuth();
-  const { accounts, categories, cards, goals, transactions } = useFinance();
+  const { accounts, categories, cards, goals, debts, transactions, conv, fmt, display } = useFinance();
+  const dt = debtTotals(debts, conv);
   const toast = useToast();
 
   const activeAccounts = accounts.filter((a) => !a.archived);
@@ -33,7 +35,10 @@ export default function More() {
         color: palette.primary,
         title: 'Cuentas',
         subtitle: activeAccounts.length
-          ? `${plural(activeAccounts.length, 'cuenta', 'cuentas')} · ${namesSummary(activeAccounts.map((a) => a.name), 1)}`
+          ? `${plural(activeAccounts.length, 'cuenta', 'cuentas')} · ${namesSummary(
+              activeAccounts.map((a) => a.name),
+              1,
+            )}`
           : 'Efectivo, Mercado Pago, bancos',
         screen: 'Cuentas',
       },
@@ -42,7 +47,10 @@ export default function More() {
         color: palette.info,
         title: 'Tarjetas',
         subtitle: cards.length
-          ? `${plural(cards.length, 'tarjeta', 'tarjetas')} · ${namesSummary(cards.map((c) => c.name), 1)}`
+          ? `${plural(cards.length, 'tarjeta', 'tarjetas')} · ${namesSummary(
+              cards.map((c) => c.name),
+              1,
+            )}`
           : 'Cierre y vencimiento',
         screen: 'Tarjetas',
       },
@@ -65,6 +73,21 @@ export default function More() {
         title: 'Metas de ahorro',
         subtitle: goals.length ? plural(goals.length, 'meta', 'metas') : 'Ahorrá para algo concreto',
         screen: 'Metas',
+      },
+      {
+        icon: 'hand-coin-outline',
+        color: palette.info,
+        title: 'Deudas y préstamos',
+        subtitle:
+          dt.owed || dt.owe
+            ? [
+                dt.owed ? `Te deben ${fmt(dt.owed, display, { compact: true })}` : null,
+                dt.owe ? `Debés ${fmt(dt.owe, display, { compact: true })}` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')
+            : 'Lo que te deben y lo que debés',
+        screen: 'Deudas',
       },
       {
         icon: 'currency-usd',

@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { addMonths, currentPeriod, fromDateStr } from './dates';
-import { commitmentsFor } from './finance';
+import { commitmentsFor, debtStatus } from './finance';
 import { formatMoney } from './money';
 
 Notifications.setNotificationHandler({
@@ -41,9 +41,9 @@ function reminderDate(due) {
 
 /**
  * Reprograma todos los recordatorios de vencimientos de este mes y el siguiente.
- * Se llama cada vez que cambian los fijos, cuotas o tarjetas.
+ * Se llama cada vez que cambian los fijos, cuotas, tarjetas o deudas.
  */
-export async function rescheduleReminders(recurring, purchases, cards) {
+export async function rescheduleReminders(recurring, purchases, cards, debts = []) {
   if (Platform.OS === 'web') return;
   const perm = await Notifications.getPermissionsAsync();
   if (!perm.granted) return;
@@ -87,6 +87,26 @@ export async function rescheduleReminders(recurring, purchases, cards) {
         trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: CHANNEL },
       });
     }
+  }
+
+  // Deudas con fecha para devolver: aviso el día anterior
+  for (const d of debts) {
+    if (!d.dueDate) continue;
+    const { pending } = debtStatus(d);
+    if (!pending) continue;
+    const date = reminderDate(d.dueDate);
+    if (!date) continue;
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title:
+          d.direction === 'owed'
+            ? `Mañana ${d.person} te tiene que devolver`
+            : `Mañana tenés que devolverle a ${d.person}`,
+        body: formatMoney(pending, d.currency),
+        data: { url: `/deuda?id=${d.id}` },
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: CHANNEL },
+    });
   }
 }
 

@@ -69,6 +69,16 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
     amountColor = palette.income;
   } else if (tx.type === 'expense') {
     amount = '−' + amount;
+  } else if (tx.source?.kind === 'debt') {
+    // Préstamo o devolución: entra o sale plata de una cuenta, con otra persona del otro lado
+    const inbound = !tx.accountId;
+    const own = inbound ? to : acc;
+    icon = inbound ? 'hand-coin-outline' : 'account-arrow-right-outline';
+    color = palette.info;
+    title = tx.note || (inbound ? 'Entrada de préstamo' : 'Préstamo');
+    subtitle = [own?.name ?? 'Cuenta borrada', when].filter(Boolean).join(' · ');
+    amount = (inbound ? '+' : '−') + formatMoney(tx.amount, tx.currency);
+    amountColor = inbound ? palette.income : palette.text;
   } else {
     const isExchange = tx.toAccountId && tx.toAmount != null && to && acc && to.currency !== acc.currency;
     icon = isExchange ? 'swap-horizontal-circle-outline' : 'bank-transfer';
@@ -99,7 +109,14 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
       right={amount}
       rightSub={rightSub}
       rightColor={amountColor}
-      onPress={onPress ?? (() => navigate('Movimiento', { id: tx.id }))}
+      onPress={
+        onPress ??
+        (() =>
+          // Los movimientos de una deuda se manejan desde la deuda (así no se desincronizan)
+          tx.source?.kind === 'debt'
+            ? navigate('DeudaDetalle', { id: tx.source.id })
+            : navigate('Movimiento', { id: tx.id }))
+      }
     />
   );
 }

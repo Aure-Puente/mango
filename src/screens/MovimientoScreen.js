@@ -150,7 +150,7 @@ export default function TransactionForm() {
   };
 
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const linked = existing?.source;
+  const linked = existing?.source && existing.source.kind !== 'debt' ? existing.source : null;
   const linkedWhat = linked?.kind === 'installment' ? 'una cuota' : 'un fijo';
   const doDelete = async () => {
     await deleteTransaction(existing);

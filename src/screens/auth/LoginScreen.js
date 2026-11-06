@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text } from 'react-native-paper';
-import { AuthError, AuthLayout, GoogleButton, OrDivider } from '@/components/AuthForm';
+import { AuthError, AuthLayout, AuthLink, GoogleButton, OrDivider } from '@/components/AuthForm';
 import { Field } from '@/components/fields';
 import { ActionButton } from '@/components/ui';
 import { authErrorMessage, useAuth } from '@/context/AuthContext';
@@ -43,7 +43,7 @@ export default function Login() {
   };
 
   const forgot = async () => {
-    if (!email) return setError('Escribí tu email y tocá de nuevo "Olvidé mi contraseña".');
+    if (!email) return setError('Escribí tu email y tocá de nuevo "¿Olvidaste tu contraseña?".');
     try {
       await resetPassword(email);
       toast.show('Te enviamos un email para restablecer la contraseña');
@@ -54,17 +54,16 @@ export default function Login() {
 
   return (
     <AuthLayout
-      title="Hola de nuevo"
       subtitle="Tus cuentas claras, mes a mes."
       footer={
         <Text variant="bodyMedium" style={{ color: palette.textSecondary }}>
-          ¿No tenés cuenta?{' '}
+          ¿Primera vez?{' '}
           <Text
             onPress={() => replace('Register')}
             style={{ color: palette.primary, fontFamily: 'Inter_600SemiBold' }}
             suppressHighlighting
           >
-            Creala acá
+            Creá tu cuenta
           </Text>
         </Text>
       }
@@ -95,6 +94,7 @@ export default function Login() {
         }
         onSubmitEditing={submit}
       />
+      <AuthLink label="¿Olvidaste tu contraseña?" onPress={forgot} />
       <AuthError>{error}</AuthError>
       <ActionButton
         label="Ingresar"
@@ -102,12 +102,6 @@ export default function Login() {
         loading={loading === 'email'}
         disabled={!!loading && loading !== 'email'}
         style={{ marginTop: 4 }}
-      />
-      <ActionButton
-        variant="ghost"
-        label="Olvidé mi contraseña"
-        color={palette.textSecondary}
-        onPress={forgot}
       />
     </AuthLayout>
   );

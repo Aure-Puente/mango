@@ -14,6 +14,9 @@ import CompraScreen from '@/screens/CompraScreen';
 import CotizacionesScreen from '@/screens/CotizacionesScreen';
 import CuentaScreen from '@/screens/CuentaScreen';
 import CuentasScreen from '@/screens/CuentasScreen';
+import DeudaDetalleScreen from '@/screens/DeudaDetalleScreen';
+import DeudaScreen from '@/screens/DeudaScreen';
+import DeudasScreen from '@/screens/DeudasScreen';
 import FijoScreen from '@/screens/FijoScreen';
 import MetaScreen from '@/screens/MetaScreen';
 import MetasScreen from '@/screens/MetasScreen';
@@ -115,6 +118,17 @@ export default function RootNavigator() {
               name="Cotizaciones"
               component={CotizacionesScreen}
               options={{ ...push, title: 'Dólar hoy' }}
+            />
+            <Stack.Screen
+              name="Deudas"
+              component={DeudasScreen}
+              options={{ ...push, title: 'Deudas y préstamos' }}
+            />
+            <Stack.Screen name="Deuda" component={DeudaScreen} options={{ ...modal, title: 'Deuda' }} />
+            <Stack.Screen
+              name="DeudaDetalle"
+              component={DeudaDetalleScreen}
+              options={{ ...push, title: 'Detalle' }}
             />
             <Stack.Screen name="Ajustes" component={AjustesScreen} options={{ ...push, title: 'Ajustes' }} />
           </>

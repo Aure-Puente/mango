@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Animated, BackHandler, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Path } from 'react-native-svg';
+import { useHandoffTarget } from '@/lib/handoff';
 import { palette, radius, space } from '@/theme';
 
 // Silueta del logo (la misma de los títulos), rellena. viewBox ajustado al dibujo con la hoja.
@@ -67,6 +68,8 @@ export function FabDim() {
  */
 export function MangoFab({ actions }) {
   const [open, setOpen] = useState(false);
+  // Al abrir la app, el mango de la splash viaja hasta acá; mientras tanto este queda oculto
+  const [handRef, handVisible] = useHandoffTarget('fab');
   const [progress] = useState(() => new Animated.Value(0)); // 0 cerrado → 1 abierto
   const [press] = useState(() => new Animated.Value(0)); // 0 suelto → 1 presionado
 
@@ -188,7 +191,16 @@ export function MangoFab({ actions }) {
           accessibilityState={{ expanded: open }}
           style={styles.hit}
         >
-          <Animated.View style={{ width: W, height: H, transform: [{ scale }, { rotate: tilt }] }}>
+          <Animated.View
+            ref={handRef}
+            collapsable={false}
+            style={{
+              width: W,
+              height: H,
+              opacity: handVisible ? 1 : 0,
+              transform: [{ scale }, { rotate: tilt }],
+            }}
+          >
             <Svg width={W} height={H} viewBox={VIEWBOX} style={StyleSheet.absoluteFill}>
               {/* Borde del color del fondo: lo despega del contenido que pasa por debajo */}
               <Path d={BODY} fill={palette.background} stroke={palette.background} strokeWidth={9} />
