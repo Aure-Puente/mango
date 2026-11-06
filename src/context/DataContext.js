@@ -1,3 +1,4 @@
+//DataContext:
 import {
   arrayRemove,
   arrayUnion,
@@ -20,7 +21,6 @@ import { useAuth } from './AuthContext';
 
 const Ctx = createContext(null);
 
-/** Subir cuando cambien las categorías por defecto (y agregar su migración abajo) */
 const CATEGORIES_VERSION = 2;
 
 const DEFAULT_CATEGORIES = [
@@ -111,7 +111,6 @@ export function DataProvider({ children }) {
     return () => unsubs.forEach((u) => u());
   }, [uid]);
 
-  // Datos iniciales la primera vez que entra el usuario
   useEffect(() => {
     if (!uid || seeding.current) return;
     seeding.current = true;
@@ -133,7 +132,6 @@ export function DataProvider({ children }) {
         return;
       }
 
-      // Migración v2: "Comida y salidas" pasa a ser "Comida" + "Salidas", y se suma "Gimnasio"
       if ((current.catVersion ?? 1) < 2) {
         const catsRef = collection(db, 'users', uid, 'categories');
         const existing = (await getDocs(catsRef)).docs.map((d) => ({
@@ -181,11 +179,6 @@ export function DataProvider({ children }) {
 
     const remove = (col, id) => deleteDoc(docRef(col, id));
 
-    /** Marca como pagos varios compromisos, creando un movimiento por cada uno */
-    /**
-     * Marca como pagos varios compromisos, creando un movimiento por cada uno.
-     * Devuelve [{ c, txId }] para poder deshacerlo con revertPayments.
-     */
     const payCommitments = async (cs, opts) => {
       const batch = writeBatch(db);
       const date = opts.date ?? today();
@@ -227,7 +220,6 @@ export function DataProvider({ children }) {
       return created;
     };
 
-    /** Deshace payCommitments: borra esos movimientos y vuelve a dejar pendientes los compromisos */
     const revertPayments = async (created) => {
       const batch = writeBatch(db);
       for (const { c, txId } of created) {
@@ -257,8 +249,6 @@ export function DataProvider({ children }) {
           batch.update(docRef('purchases', s.purchaseId), upd);
         }
       } else if (s.kind === 'debt') {
-        // Borrar el movimiento de una deuda: si era un cobro/pago, se saca de la deuda;
-        // si era el préstamo inicial, la deuda queda como anotación (sin cuenta)
         const d = debts.find((x) => x.id === s.id);
         if (!d) return;
         if (s.paymentId) {
@@ -270,12 +260,6 @@ export function DataProvider({ children }) {
       }
     };
 
-    /**
-     * Movimiento de una deuda. Es una transferencia con "fuera de Mango" del otro lado,
-     * así mueve el saldo de la cuenta sin contar como gasto ni ingreso.
-     *  - Te deben (owed): prestar saca plata de tu cuenta; cobrar la vuelve a entrar.
-     *  - Debés (owe): pedir prestado entra plata; pagar la saca.
-     */
     const debtTx = (d, { amount, date, accountId, paymentId }) => {
       const initial = !paymentId;
       const out = (d.direction === 'owed') === initial;
@@ -305,7 +289,6 @@ export function DataProvider({ children }) {
 
     return {
       ready: !!uid && ['accounts', 'categories', 'transactions', 'settings'].every((k) => loaded.has(k)),
-      /** ¿Ya llegaron estas colecciones? Ej: isLoaded('cards', 'purchases') */
       isLoaded: (...keys) => !!uid && keys.every((k) => loaded.has(k)),
       settings,
       accounts,
@@ -319,7 +302,6 @@ export function DataProvider({ children }) {
       save,
       remove,
 
-      /** Nueva deuda (y su movimiento, si elegiste cuenta). Devuelve el id. */
       createDebt: async (data) => {
         const batch = writeBatch(db);
         const ref = doc(colRef('debts'));
@@ -335,7 +317,6 @@ export function DataProvider({ children }) {
         return ref.id;
       },
 
-      /** Editar una deuda: rehace su movimiento inicial con los datos nuevos */
       editDebt: async (d, data) => {
         const batch = writeBatch(db);
         const next = { ...d, ...data };
@@ -350,7 +331,6 @@ export function DataProvider({ children }) {
         await batch.commit();
       },
 
-      /** Cobro (te deben) o pago (debés), total o parcial. Devuelve el pago, para poder deshacerlo. */
       addDebtPayment: async (d, { amount, date, accountId }) => {
         const batch = writeBatch(db);
         const paymentId = doc(colRef('debts')).id;
@@ -366,7 +346,6 @@ export function DataProvider({ children }) {
         return payment;
       },
 
-      /** Saca un cobro/pago y borra su movimiento */
       removeDebtPayment: async (d, payment) => {
         const batch = writeBatch(db);
         if (payment.txId) batch.delete(docRef('transactions', payment.txId));
@@ -374,7 +353,6 @@ export function DataProvider({ children }) {
         await batch.commit();
       },
 
-      /** Borra la deuda con todos sus movimientos (el préstamo y los cobros/pagos) */
       deleteDebt: async (d) => {
         const batch = writeBatch(db);
         if (d.txId) batch.delete(docRef('transactions', d.txId));

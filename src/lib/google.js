@@ -1,3 +1,4 @@
+//google:
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { TurboModuleRegistry } from 'react-native';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
@@ -5,25 +6,14 @@ import { auth } from './firebase';
 
 let configured = false;
 
-/**
- * true solo si el módulo nativo de Google Sign-In está en el binario
- * (development build o build de producción). En Expo Go es false.
- * Se usa TurboModuleRegistry.get, que devuelve null en vez de tirar error.
- */
 export const googleAvailable =
   Constants.executionEnvironment !== ExecutionEnvironment.StoreClient &&
   TurboModuleRegistry.get('RNGoogleSignin') != null;
 
-/**
- * Inicia sesión con Google y la vincula a Firebase Auth.
- * Devuelve false si el usuario canceló.
- * Requiere development build (no funciona dentro de Expo Go).
- */
 export async function signInWithGoogle() {
   if (!googleAvailable) {
     throw new Error('El acceso con Google necesita un development build. En Expo Go usá email y contraseña.');
   }
-  // Carga diferida: si el módulo nativo no está, no rompe el resto de la app
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const mod = require('@react-native-google-signin/google-signin');
   const { GoogleSignin, isSuccessResponse } = mod;
@@ -53,6 +43,5 @@ export async function signOutGoogle() {
     const { GoogleSignin } = require('@react-native-google-signin/google-signin');
     await GoogleSignin.signOut();
   } catch {
-    // No había sesión de Google
   }
 }

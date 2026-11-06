@@ -1,3 +1,4 @@
+//MovimientoScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRoute } from '@react-navigation/native';
@@ -67,10 +68,8 @@ export default function TransactionForm() {
     () => categories.filter((c) => c.kind === (type === 'income' ? 'income' : 'expense')),
     [categories, type],
   );
-  // El monto en blanco para gastos (el rojo grande alarmaba); verde para ingresos
   const color = type === 'income' ? palette.income : palette.text;
 
-  // Cotización implícita de la operación de cambio
   const cents = parseAmount(amount) ?? 0;
   const toCents = parseAmount(toAmount) ?? 0;
   const impliedRate =
@@ -113,7 +112,6 @@ export default function TransactionForm() {
       await save('transactions', data);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
 
-      // Alerta de presupuesto
       if (type === 'expense' && categoryId) {
         const others = transactions.filter((t) => t.id !== existing?.id);
         const row = spendingByCategory(
@@ -343,13 +341,11 @@ export default function TransactionForm() {
   );
 }
 
-/** "de hoy", "de ayer", "del 4 nov" */
 function ofDate(d) {
   const l = dateLabel(d);
   return l === 'Hoy' || l === 'Ayer' ? `de ${l.toLowerCase()}` : `del ${l}`;
 }
 
-/** Aclaración chica con ícono */
 function Hint({ icon, children }) {
   return (
     <View style={styles.hint}>

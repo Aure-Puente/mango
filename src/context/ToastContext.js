@@ -1,3 +1,4 @@
+//ToastContext:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, View } from 'react-native';
@@ -13,18 +14,10 @@ const TONES = {
   error: { icon: 'close', color: palette.expense },
 };
 
-/**
- * Avisos cortos de la app.
- *   toast.show(mensaje, { tone: 'warn' | 'error', action: { label: 'Deshacer', onPress } })
- * Tarjeta flotante con el ícono en una burbuja de color, que entra con un rebote suave desde abajo,
- * se va sola (3 s, o 6 s si tiene acción) y se puede cerrar tocándola o deslizándola.
- * Con acción, una línea fina abajo muestra el tiempo que queda para usarla.
- */
 export function ToastProvider({ children }) {
   const [state, setState] = useState(null);
   const insets = useSafeAreaInsets();
 
-  // Todo lo animado y el cierre viven en un objeto estable (se crea una sola vez)
   const [ctl] = useState(() => {
     const anim = new Animated.Value(0);
     const drag = new Animated.ValueXY();
@@ -37,7 +30,6 @@ export function ToastProvider({ children }) {
         if (finished) setState(null);
       });
     };
-    // Deslizar hacia abajo o a los costados lo cierra; si no llega, vuelve a su lugar
     const pan = PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8 || g.dy > 8,
       onPanResponderMove: (_, g) => drag.setValue({ x: g.dx, y: Math.max(0, g.dy) }),
@@ -162,7 +154,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     borderRadius: radius.md,
-    // Un gris más claro que las tarjetas y un borde fino: se despega de lo que tiene atrás
     backgroundColor: '#26262C',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.12)',

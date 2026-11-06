@@ -1,3 +1,4 @@
+//UpdateBanner:
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -6,7 +7,6 @@ import { useAppUpdates } from '@/hooks/useAppUpdates';
 import { palette, radius, space } from '@/theme';
 import { IconBubble, SmallButton } from './ui';
 
-/** Aviso flotante cuando hay una actualización descargada lista para aplicar (baja desde arriba) */
 export function UpdateBanner() {
   const { status, apply } = useAppUpdates();
   const [hidden, setHidden] = useState(false);

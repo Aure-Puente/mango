@@ -1,3 +1,4 @@
+//CuentaScreen:
 import { useRoute } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -66,7 +67,6 @@ export default function AccountForm() {
     }
   };
 
-  // Saldo actual con el saldo inicial que estás editando (para la vista previa)
   const initialCents = parseAmount(initial) ?? 0;
   const current = existing
     ? (balances[existing.id] ?? 0) - (existing.initialBalance ?? 0) + initialCents
@@ -78,7 +78,6 @@ export default function AccountForm() {
     await remove('accounts', existing.id);
     goBack();
   };
-  // Si tiene movimientos no se puede borrar: el diálogo ofrece archivarla
   const doArchive = async () => {
     await save('accounts', { ...existing, archived: true });
     toast.show('Cuenta archivada');
@@ -103,7 +102,6 @@ export default function AccountForm() {
         }}
       />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa: así se ve en Cuentas */}
         <Card style={styles.preview}>
           <IconBubble icon={ACCOUNT_ICON[type]} color={color} />
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -231,7 +229,6 @@ export default function AccountForm() {
   );
 }
 
-/** Aclaración chica con ícono debajo de un campo */
 function Hint({ icon, color, children }) {
   return (
     <View style={styles.hint}>

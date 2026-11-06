@@ -1,3 +1,4 @@
+//TabNavigator:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
@@ -18,7 +19,6 @@ function icon(name, active) {
   };
 }
 
-/** Las 5 pestañas de abajo, con la barra propia de Mango */
 export default function TabNavigator() {
   return (
     <View style={{ flex: 1, backgroundColor: palette.background }}>
@@ -63,7 +63,6 @@ export default function TabNavigator() {
           }}
         />
       </Tab.Navigator>
-      {/* Fondo detrás de la hora y la batería, encima de todas las pestañas */}
       <StatusBarScrim />
     </View>
   );

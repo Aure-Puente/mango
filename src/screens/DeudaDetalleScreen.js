@@ -1,3 +1,4 @@
+//DeudaDetalleScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -37,7 +38,7 @@ export default function DebtDetail() {
   const { debts, accounts, deleteDebt, removeDebtPayment, addDebtPayment } = useFinance();
   const toast = useToast();
   const [paying, setPaying] = useState(false);
-  const [confirm, setConfirm] = useState(null); // 'delete' | payment a borrar
+  const [confirm, setConfirm] = useState(null);
   const d = debts.find((x) => x.id === id);
 
   if (!d) {

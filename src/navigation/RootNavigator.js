@@ -1,3 +1,4 @@
+//RootNavigator:
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 import { NotificationHandler } from '@/components/NotificationHandler';
@@ -28,23 +29,17 @@ import TabNavigator from './TabNavigator';
 
 const Stack = createNativeStackNavigator();
 
-/** Formularios: hoja que sube desde abajo (en iOS, la hoja nativa con gesto para cerrar) */
 const modal = {
   presentation: 'modal',
   headerShown: true,
   animation: Platform.OS === 'ios' ? 'default' : 'slide_from_bottom',
 };
 
-/** Pantallas de detalle y listados: entran desde la derecha, con el deslizamiento de iOS también en Android */
 const push = {
   headerShown: true,
   animation: Platform.OS === 'android' ? 'ios_from_right' : 'slide_from_right',
 };
 
-/**
- * Navegador principal. Sin sesión: Login y Registro. Con sesión: las pestañas
- * y, encima, los formularios y pantallas de detalle.
- */
 export default function RootNavigator() {
   const { user, initializing } = useAuth();
 

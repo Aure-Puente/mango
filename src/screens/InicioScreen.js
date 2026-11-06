@@ -1,3 +1,4 @@
+//InicioScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo, useState } from 'react';
@@ -28,8 +29,6 @@ import { RATE_LABEL } from '@/lib/rates';
 import { navigate } from '@/navigation/RootNavigation';
 import { palette, radius, space } from '@/theme';
 
-// Texto secundario dentro de la tarjeta principal: blanco translúcido en vez del gris frío,
-// así toma el tono cálido del fondo y no se ve "sucio" sobre el naranja
 const HERO_MUTED = 'rgba(255,255,255,0.62)';
 
 export default function Home() {
@@ -93,7 +92,6 @@ export default function Home() {
         <Columns
           left={
             <>
-              {/* Lo que queda */}
               <Card style={styles.hero}>
                 <LinearGradient
                   pointerEvents="none"
@@ -173,7 +171,6 @@ export default function Home() {
                 ) : null}
               </Card>
 
-              {/* Alertas */}
               {insight && insight.level !== 'ok' ? (
                 <Alert
                   tone={insight.level === 'high' ? 'error' : 'warn'}
@@ -198,7 +195,6 @@ export default function Home() {
                 />
               ))}
 
-              {/* Cuentas */}
               <Block label="Tus cuentas" action="Ver todas" onAction={() => navigate('Cuentas')}>
                 <ScrollView
                   horizontal
@@ -253,7 +249,6 @@ export default function Home() {
                     <MaterialCommunityIcons name="chevron-right" size={18} color={palette.textDisabled} />
                   </Pressable>
                 ) : null}
-                {/* Deudas: lo que te deben y lo que debés, en una línea */}
                 {dt.owed || dt.owe ? (
                   <Pressable
                     onPress={() => navigate('Deudas', { direction: dt.owed ? 'owed' : 'owe' })}
@@ -293,7 +288,6 @@ export default function Home() {
           }
           right={
             <>
-              {/* Vencimientos */}
               <Block
                 label="Próximos vencimientos"
                 action="Ver mes"
@@ -319,7 +313,6 @@ export default function Home() {
                 </Card>
               </Block>
 
-              {/* Metas */}
               {goals.length > 0 ? (
                 <Block label="Metas" action="Ver" onAction={() => navigate('Metas')}>
                   <Card style={{ gap: space.lg }}>
@@ -366,7 +359,6 @@ export default function Home() {
                 </Block>
               ) : null}
 
-              {/* Últimos movimientos */}
               <Block label="Últimos movimientos" action="Ver todos" onAction={() => navigate('Movimientos')}>
                 <Card style={{ paddingVertical: space.xs }}>
                   {transactions.length === 0 ? (
@@ -395,10 +387,6 @@ export default function Home() {
   );
 }
 
-/**
- * Esqueleto de Inicio mientras llegan los datos: el mismo encabezado real (saludo, mes y Ajustes),
- * las mismas columnas en tablet y cada bloque con la forma exacta de lo que va a aparecer.
- */
 function HomeSkeleton({ name, period, twoCol }) {
   return (
     <View style={{ flex: 1 }}>
@@ -419,7 +407,6 @@ function HomeSkeleton({ name, period, twoCol }) {
         <Columns
           left={
             <>
-              {/* Tarjeta principal: título + chip de moneda, monto, ingresos | gastos, aclaración y ahorro */}
               <Card style={styles.hero}>
                 <LinearGradient
                   pointerEvents="none"
@@ -454,7 +441,6 @@ function HomeSkeleton({ name, period, twoCol }) {
                 </View>
               </Card>
 
-              {/* Cuentas: la fila sale del borde igual que la real; la primera es "Total" */}
               <View style={{ marginTop: space.xl }}>
                 <SkeletonLabel title={100} action={72} />
                 <View style={styles.skAccounts}>
@@ -466,7 +452,6 @@ function HomeSkeleton({ name, period, twoCol }) {
                     </View>
                   ))}
                 </View>
-                {/* Dólar: punto, nombre, valor y flecha */}
                 <View style={styles.quote}>
                   <Skeleton width={22} height={22} radius={11} />
                   <View style={{ flex: 1 }}>
@@ -480,7 +465,6 @@ function HomeSkeleton({ name, period, twoCol }) {
           }
           right={
             <>
-              {/* Vencimientos: monto y "en X días" a la derecha, en dos líneas */}
               <View style={{ marginTop: twoCol ? 0 : space.xl }}>
                 <SkeletonLabel title={170} action={64} />
                 <Card style={{ paddingVertical: space.xs }}>
@@ -490,7 +474,6 @@ function HomeSkeleton({ name, period, twoCol }) {
                 </Card>
               </View>
 
-              {/* Metas: punto, nombre y "$ X de $ Y", porcentaje y barra */}
               <View style={{ marginTop: space.xl }}>
                 <SkeletonLabel title={52} action={30} />
                 <Card style={{ gap: space.lg }}>
@@ -510,7 +493,6 @@ function HomeSkeleton({ name, period, twoCol }) {
                 </Card>
               </View>
 
-              {/* Últimos movimientos: las mismas 6 filas */}
               <View style={{ marginTop: space.xl }}>
                 <SkeletonLabel title={150} action={72} />
                 <Card style={{ paddingVertical: space.xs }}>
@@ -528,7 +510,6 @@ function HomeSkeleton({ name, period, twoCol }) {
   );
 }
 
-/** Fila con la misma medida que Row: ícono 40, título + subtítulo y monto (con 2ª línea opcional) */
 function SkRow({ i, rightSub }) {
   return (
     <View>
@@ -557,7 +538,6 @@ function SkeletonLabel({ title = 130, action = 60 }) {
   );
 }
 
-/** Sección con rótulo en mayúscula y acción "Ver ›" a la derecha */
 function Block({ label, action, onAction, style, children }) {
   return (
     <FadeIn delay={70} style={[{ marginTop: space.xl }, style]}>
@@ -597,7 +577,6 @@ function Stat({ label, value, color, icon }) {
   );
 }
 
-/** Aviso sutil: tarjeta neutra, el tono lo marcan solo el ícono y una línea de color a la izquierda */
 function Alert({ tone, icon, title, text, onPress }) {
   const c = tone === 'error' ? palette.expense : palette.warning;
   return (

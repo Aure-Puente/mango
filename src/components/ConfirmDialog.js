@@ -1,3 +1,4 @@
+//ConfirmDialog:
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Dialog, Portal, Text } from 'react-native-paper';
@@ -5,23 +6,6 @@ import { palette, space } from '@/theme';
 import { dialogStyle } from './finance';
 import { ActionButton, IconBubble } from './ui';
 
-/**
- * Confirmación con el estilo de Mango (reemplaza al Alert nativo).
- *
- *   <ConfirmDialog
- *     visible={open}
- *     icon="logout"
- *     title="¿Cerrar sesión?"
- *     message="Vas a tener que volver a ingresar."
- *     confirmLabel="Cerrar sesión"
- *     tone="danger"
- *     onConfirm={signOut}
- *     onDismiss={() => setOpen(false)}
- *   />
- *
- * tone: 'danger' (rojo, para borrar o salir) · 'primary' (naranja)
- * onConfirm puede ser async: mientras corre, el botón muestra que está cargando.
- */
 export function ConfirmDialog({
   visible,
   icon = 'help-circle-outline',

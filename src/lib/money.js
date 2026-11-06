@@ -1,7 +1,4 @@
-/**
- * Convierte texto ingresado por el usuario a centavos.
- * Acepta "1.234,56", "1234,56", "1234.56", "1.500" (= 1500).
- */
+//money:
 export function parseAmount(input) {
   let s = input.replace(/[^\d.,-]/g, '').trim();
   if (!s) return null;
@@ -17,7 +14,6 @@ export function parseAmount(input) {
   return Math.round(n * 100);
 }
 
-/** Centavos -> texto editable ("1234,5") */
 export function centsToInput(cents) {
   if (cents == null) return '';
   const v = cents / 100;
@@ -47,13 +43,11 @@ export function formatMoney(cents, currency = 'ARS', opts = {}) {
   return opts.bare ? `${prefix}${body}` : `${prefix}${currencySymbol(currency)} ${body}`;
 }
 
-/** Convierte entre monedas usando pesos por dólar */
 export function convert(cents, from, to, rate) {
   if (from === to || !rate) return cents;
   return from === 'USD' ? Math.round(cents * rate) : Math.round(cents / rate);
 }
 
-/** Divide un total en N partes enteras; el resto va a la última */
 export function splitEven(total, parts) {
   const base = Math.floor(total / parts);
   const arr = Array.from({ length: parts }, () => base);

@@ -15,7 +15,7 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/REEMPLAZAR_CON_EAS_PROJECT_ID"
+      "url": "https://u.expo.dev/55a49866-34d2-4128-9d14-a996f2bdd84d"
     },
     "ios": {
       "supportsTablet": true,
@@ -64,8 +64,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "REEMPLAZAR_CON_EAS_PROJECT_ID"
+        "projectId": "55a49866-34d2-4128-9d14-a996f2bdd84d"
       }
-    }
+    },
+    "owner": "aurex"
   }
 }

@@ -1,3 +1,4 @@
+//export:
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
@@ -10,10 +11,6 @@ function cell(v) {
 
 const num = (cents) => (cents / 100).toFixed(2).replace('.', ',');
 
-/**
- * Exporta movimientos a CSV separado por ";" con BOM,
- * así Excel en español lo abre directo con acentos y columnas bien separadas.
- */
 export async function exportTransactionsCsv(txs, accounts, categories, fileName = 'mango-movimientos') {
   const acc = new Map(accounts.map((a) => [a.id, a.name]));
   const cat = new Map(categories.map((c) => [c.id, c.name]));

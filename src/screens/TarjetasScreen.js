@@ -1,4 +1,4 @@
-//Importaciones:
+//TarjetasScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -11,14 +11,12 @@ import { formatMoney } from '@/lib/money';
 import { navigate } from '@/navigation/RootNavigation';
 import { palette, space } from '@/theme';
 
-//JS:
 export default function Cards() {
   const { cards, commitments, purchases } = useFinance();
   const now = currentPeriod();
   const periods = [now, addMonths(now, 1)];
   const hoy = today();
 
-  /** Resumen de una tarjeta en un mes: total por moneda y fecha de vencimiento */
   const statement = (card, p) => {
     const items = commitments(p).filter((c) => c.cardId === card.id);
     const ars = items.filter((i) => i.currency === 'ARS').reduce((s, i) => s + i.amount, 0);
@@ -52,7 +50,6 @@ export default function Cards() {
           </Card>
         ) : (
           <>
-            {/* Las tarjetas, dibujadas como plásticos */}
             <View style={{ gap: space.md }}>
               {cards.map((c) => {
                 const active = purchases.filter(
@@ -69,7 +66,6 @@ export default function Cards() {
               })}
             </View>
 
-            {/* Próximos resúmenes, agrupados por tarjeta */}
             <View style={styles.section}>
               <Label>Próximos resúmenes</Label>
               <View style={{ gap: space.md }}>

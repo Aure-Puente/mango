@@ -1,3 +1,4 @@
+//CompraDetalleScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,9 +30,7 @@ import { goBack, navigate } from '@/navigation/RootNavigation';
 import { palette, radius, space } from '@/theme';
 
 const lower = (s) => s.toLowerCase();
-/** Monto que no se corta en dos renglones ("$" y el número juntos) */
 const nb = (s) => s.replace(/\s/g, '\u00A0');
-/** "abr 2027" */
 const shortMonth = (p) =>
   periodLabel(p)
     .replace(/^(\S{3})\S*/, '$1')
@@ -42,7 +41,7 @@ export default function PurchaseDetail() {
   const { purchases, cards, categories, commitments, remove, prepayPurchase, undoPrepay } = useFinance();
   const toast = useToast();
   const [paying, setPaying] = useState(null);
-  const [confirm, setConfirm] = useState(null); // 'delete' | 'prepay' | 'undo'
+  const [confirm, setConfirm] = useState(null);
   const p = purchases.find((x) => x.id === id);
 
   if (!p) {
@@ -112,7 +111,6 @@ export default function PurchaseDetail() {
         }}
       />
       <Screen>
-        {/* Resumen de la compra */}
         <Card style={[styles.hero, { borderColor: color + '33' }]}>
           <LinearGradient
             pointerEvents="none"
@@ -155,7 +153,6 @@ export default function PurchaseDetail() {
           </Text>
         </Card>
 
-        {/* Acción principal: pagar la cuota que toca */}
         {nextIsDue ? (
           <ActionButton
             icon="check"
@@ -165,7 +162,6 @@ export default function PurchaseDetail() {
           />
         ) : null}
 
-        {/* Adelantar o deshacer: discreto, no compite con lo importante */}
         {!prog.done ? (
           p.prepaidAt ? (
             <OptionRow
@@ -307,7 +303,6 @@ function Stat({ label, value }) {
   );
 }
 
-/** Opción secundaria: fila sobria con ícono, título y explicación */
 function OptionRow({ icon, title, text, onPress }) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.option, pressed && { opacity: 0.6 }]}>

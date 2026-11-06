@@ -1,3 +1,4 @@
+//AjustesScreen:
 import Constants from 'expo-constants';
 import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
@@ -52,7 +53,6 @@ export default function Settings() {
 
   return (
     <Screen>
-      {/* Visualización: todo lo que cambia cómo se ven los números */}
       <Label>Visualización</Label>
       <Group>
         <View style={styles.block}>

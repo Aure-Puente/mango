@@ -1,4 +1,4 @@
-//Theme:
+//theme:
 import { MD3DarkTheme, configureFonts } from 'react-native-paper';
 import { DarkTheme as NavDark } from '@react-navigation/native';
 
@@ -26,7 +26,6 @@ export const palette = {
   info: '#8EA8FF',
 };
 
-/** Colores para elegir en cuentas, categorías, tarjetas y metas */
 export const swatches = [
   '#FF9F1C',
   '#34D1BF',
@@ -42,7 +41,6 @@ export const swatches = [
   '#14B8A6',
 ];
 
-/** Colores para series de gráficos (validados sobre fondo oscuro) */
 export const chartColors = [
   '#FF9F1C',
   '#34D1BF',
@@ -134,5 +132,4 @@ export const navTheme = {
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 };
 export const radius = { sm: 12, md: 20, lg: 28, pill: 999 };
 
-/** Duraciones de animación (ms) para que todo se mueva con el mismo ritmo */
 export const motion = { fast: 120, base: 200, slow: 320 };

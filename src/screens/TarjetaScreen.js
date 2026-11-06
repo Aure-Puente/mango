@@ -1,3 +1,4 @@
+//TarjetaScreen:
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -44,7 +45,6 @@ export default function CardForm() {
     }
   };
 
-  // Compras en cuotas con esta tarjeta (para la vista previa y el aviso al borrar)
   const cardPurchases = existing ? purchases.filter((p) => p.cardId === existing.id) : [];
   const active = cardPurchases.filter((p) => Object.keys(p.paid ?? {}).length < p.installments).length;
 
@@ -55,7 +55,6 @@ export default function CardForm() {
     goBack();
   };
 
-  // Días entre el cierre y el vencimiento (el vencimiento suele caer ~10 días después)
   const gap = (dueDay - closingDay + 31) % 31;
   const tightDays = gap < 5;
 
@@ -79,7 +78,6 @@ export default function CardForm() {
         }}
       />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa: así se ve en la lista */}
         <CreditCard card={{ name: name.trim(), closingDay, dueDay, color }} active={active} />
 
         <Field
@@ -154,7 +152,6 @@ export default function CardForm() {
   );
 }
 
-/** Aclaración chica con ícono debajo de un campo */
 function Hint({ icon, color, children }) {
   return (
     <View style={styles.hint}>

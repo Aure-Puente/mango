@@ -1,3 +1,4 @@
+//dates:
 const MONTHS = [
   'Enero',
   'Febrero',
@@ -49,7 +50,6 @@ export function addMonths(p, n) {
   return `${Math.floor(idx / 12)}-${pad((idx % 12) + 1)}`;
 }
 
-/** Cantidad de meses de a hasta b (b - a) */
 export function monthsBetween(a, b) {
   const A = parsePeriod(a);
   const B = parsePeriod(b);
@@ -61,7 +61,6 @@ export function daysInMonth(p) {
   return new Date(year, month, 0).getDate();
 }
 
-/** Fecha de un período con día acotado al largo del mes (ej: 31 → 30 en noviembre) */
 export function dateInPeriod(p, day) {
   return `${p}-${pad(Math.min(Math.max(1, day), daysInMonth(p)))}`;
 }
@@ -86,7 +85,6 @@ export function dateLabel(d) {
   return `${dd} ${MONTHS_SHORT[mm - 1].toLowerCase()}${sameYear ? '' : ` ${yy}`}`;
 }
 
-/** Lista de períodos desde `from` hasta `to` inclusive */
 export function periodRange(from, to) {
   const n = monthsBetween(from, to);
   return Array.from({ length: Math.max(0, n + 1) }, (_, i) => addMonths(from, i));

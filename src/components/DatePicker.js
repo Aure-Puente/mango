@@ -1,3 +1,4 @@
+//DatePicker:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
@@ -16,7 +17,6 @@ const tap = () => {
   if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
 };
 
-/** "Viernes 6 de noviembre" (con el año si no es el actual) */
 function longDate(s) {
   const d = fromDateStr(s);
   const { year } = parsePeriod(periodOf(s));
@@ -24,18 +24,12 @@ function longDate(s) {
   return txt[0].toUpperCase() + txt.slice(1) + (year !== new Date().getFullYear() ? ` de ${year}` : '');
 }
 
-/**
- * Calendario de Mango: diálogo compacto (no pantalla completa)
- * y el día elegido como un manguito: círculo naranja con la hoja del logo asomando arriba.
- * Montalo solo cuando esté abierto (así arranca siempre en la fecha del campo).
- */
 export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title = 'Elegí la fecha' }) {
   const [sel, setSel] = useState(value);
   const [month, setMonth] = useState(periodOf(value));
   const [pop] = useState(() => new Animated.Value(1));
   const hoy = today();
 
-  // Deslizar sobre la grilla cambia de mes (izquierda → siguiente, derecha → anterior)
   const go = (n) => {
     tap();
     setMonth((m) => addMonths(m, n));
@@ -57,7 +51,6 @@ export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title =
     Animated.spring(pop, { toValue: 1, useNativeDriver: true, damping: 11, stiffness: 260 }).start();
   };
 
-  // Grilla del mes: huecos al principio para que el 1 caiga en su día de la semana
   const first = fromDateStr(`${month}-01`).getDay();
   const total = daysInMonth(month);
   const cells = [
@@ -71,7 +64,6 @@ export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title =
     <Portal>
       <Dialog visible={!!visible} onDismiss={onDismiss} style={styles.dialog}>
         <View style={styles.body}>
-          {/* Fecha elegida */}
           <View style={{ gap: 2 }}>
             <Text variant="labelMedium" style={styles.caps}>
               {title}
@@ -83,7 +75,6 @@ export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title =
 
           <View style={styles.divider} />
 
-          {/* Mes y flechas */}
           <View style={styles.monthRow}>
             <Text variant="titleMedium" style={{ flex: 1 }}>
               {periodLabel(month)}
@@ -105,7 +96,6 @@ export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title =
             ))}
           </View>
 
-          {/* Calendario */}
           <View {...swipe.panHandlers}>
             <View style={styles.week}>
               {WEEKDAYS.map((w, i) => (
@@ -143,7 +133,6 @@ export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title =
                             style={[
                               styles.num,
                               {
-                                // Los días que todavía no pasaron, más tenues
                                 color: isToday
                                   ? palette.primary
                                   : d > hoy
@@ -180,7 +169,6 @@ export function DatePickerDialog({ visible, value, onConfirm, onDismiss, title =
   );
 }
 
-/** Hojita del manguito: la misma hoja del logo (misma forma y ángulo), en chiquito */
 function Leaf() {
   return (
     <View pointerEvents="none" style={styles.leaf}>
@@ -247,7 +235,6 @@ const styles = StyleSheet.create({
     backgroundColor: palette.primary,
   },
   mangoText: { color: palette.onPrimary, fontFamily: 'Inter_700Bold', fontVariant: ['tabular-nums'] },
-  // Nace del borde de arriba, apenas a la derecha del centro: como el tallo del logo
   leaf: { position: 'absolute', top: -6, left: SIZE / 2 - 2 },
   actions: { padding: space.xl, paddingTop: space.lg, gap: space.xs },
 });

@@ -1,10 +1,10 @@
+//useFinance:
 import { useCallback, useMemo } from 'react';
 import { useData } from '@/context/DataContext';
 import { useMarket } from '@/context/MarketContext';
 import { commitmentsFor, makeConverter, monthSummary } from '@/lib/finance';
 import { formatMoney } from '@/lib/money';
 
-/** Atajos comunes: moneda de visualización, conversor y formato */
 export function useFinance() {
   const data = useData();
   const market = useMarket();

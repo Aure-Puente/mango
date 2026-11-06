@@ -1,3 +1,4 @@
+//CuentasScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
@@ -25,7 +26,6 @@ export default function Accounts() {
   const usd = active.filter((a) => a.currency === 'USD').reduce((s, a) => s + (balances[a.id] ?? 0), 0);
   const total = conv(ars, 'ARS') + conv(usd, 'USD');
 
-  // Distribución: cuánto pesa cada cuenta (solo saldos positivos, en la moneda que estás mirando)
   const parts = active
     .map((a) => ({ a, v: conv(balances[a.id] ?? 0, a.currency) }))
     .filter((x) => x.v > 0)
@@ -46,7 +46,6 @@ export default function Accounts() {
       {rows.map((a, i) => {
         const bal = balances[a.id] ?? 0;
         const negative = bal < 0;
-        // Cuentas en dólares: también su equivalente en pesos
         const inArs =
           a.currency === 'USD' && market.rate && bal
             ? ` · ≈ ${formatMoney(Math.round(bal * market.rate), 'ARS')}`
@@ -142,7 +141,6 @@ export default function Accounts() {
             <Pill label={`${formatMoney(usd, 'USD')} en dólares`} color={palette.income} />
           </View>
 
-          {/* Dónde está tu plata */}
           {parts.length > 1 ? (
             <View style={styles.dist}>
               <View style={styles.distBar}>

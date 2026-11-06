@@ -1,3 +1,4 @@
+//firebase:
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, getReactNativePersistence, initializeAuth } from 'firebase/auth';
@@ -22,14 +23,12 @@ let _auth;
 if (Platform.OS === 'web' || !isFirstInit) {
   _auth = getAuth(app);
 } else {
-  // Mantiene la sesión iniciada entre aperturas de la app
   _auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
 }
 export const auth = _auth;
 
 let _db;
 try {
-  // undefined en campos opcionales no rompe los guardados
   _db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 } catch {
   _db = getFirestore(app);

@@ -1,3 +1,4 @@
+//CompromisosScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
@@ -68,9 +69,6 @@ export default function Commitments() {
   );
 }
 
-/* ---------- Piezas compartidas ---------- */
-
-/** Tarjeta principal con el brillo naranja (igual que Cuentas, Categorías, etc.) */
 function Hero({ children, style }) {
   return (
     <Card style={[styles.hero, style]}>
@@ -98,7 +96,6 @@ function Block({ label, right, children }) {
   );
 }
 
-/** Totales separados por moneda: "$ 120.000 en pesos" · "US$ 30 en dólares" */
 function CurrencyPills({ ars, usd }) {
   if (!ars || !usd) return null;
   return (
@@ -109,19 +106,16 @@ function CurrencyPills({ ars, usd }) {
   );
 }
 
-/** "en 4 días", "hoy", "hace 2 días", "el 15": el vencimiento sin el verbo, para el pie del resumen */
 const shortDue = (d) => dueInfo(d).text.replace(/^(Venció|Vence) /, '');
 
 const sumBy = (items, cur, get = (x) => x.amount) =>
   items.filter((x) => x.currency === cur).reduce((s, x) => s + get(x), 0);
 
-/* ---------- Este mes ---------- */
-
 function MonthView() {
   const { commitments, cards, conv, fmt, display } = useFinance();
   const [period, setPeriod] = useState(currentPeriod());
   const [paying, setPaying] = useState(null);
-  const [showPaid, setShowPaid] = useState(null); // null = automático
+  const [showPaid, setShowPaid] = useState(null);
   const items = commitments(period);
   const monthName = periodLabel(period, false).toLowerCase();
 
@@ -130,9 +124,8 @@ function MonthView() {
   const paidOut = expenses.filter((c) => c.paid).reduce((s, c) => s + conv(c.amount, c.currency), 0);
   const pendingOut = expenses.filter((c) => !c.paid);
   const allPaid = expenses.length > 0 && pendingOut.length === 0;
-  const next = pendingOut[0]; // ya vienen ordenados por vencimiento
+  const next = pendingOut[0];
 
-  // Tarjetas: un resumen con algo pendiente va arriba; uno pagado entero pasa a "Pagados"
   const cardGroups = cards
     .map((card) => ({ card, items: items.filter((c) => c.cardId === card.id) }))
     .filter((g) => g.items.length > 0);
@@ -272,7 +265,6 @@ function MonthView() {
 
       {pendingOther.length ? <Block label="Otras cuotas">{list(pendingOther)}</Block> : null}
 
-      {/* Lo ya pagado: compacto y plegable para que no tape lo pendiente */}
       {paid.length ? (
         <Block
           label={`Pagados · ${paid.length}`}
@@ -313,7 +305,6 @@ function MonthView() {
   );
 }
 
-/** Fila compacta de algo ya pagado: tilde, nombre, detalle y monto atenuados */
 function PaidRow({ c, cards, onPress }) {
   const card = c.cardId ? cards.find((k) => k.id === c.cardId) : null;
   const detail = [card?.name, c.detail].filter(Boolean).join(' · ');
@@ -330,8 +321,6 @@ function PaidRow({ c, cards, onPress }) {
     </Pressable>
   );
 }
-
-/* ---------- Fijos ---------- */
 
 function FixedList() {
   const { recurring, categories, accounts, commitments, conv, fmt, display } = useFinance();
@@ -353,7 +342,6 @@ function FixedList() {
     );
   }
 
-  // Promedio por mes: un fijo que va 3 veces al año pesa 3/12
   const perMonth = (r) => Math.round((r.amount * (r.months?.length ? r.months.length : 12)) / 12);
   const outs = active.filter((r) => r.type === 'expense');
   const ins = active.filter((r) => r.type === 'income');
@@ -363,7 +351,6 @@ function FixedList() {
   const totalIn = ins.reduce((s, r) => s + conv(perMonth(r), r.currency), 0);
   const averaged = outs.some((r) => r.months?.length);
 
-  // El próximo fijo sin pagar: primero este mes, si no el que viene
   const pendingFixed = (p) =>
     commitments(p).filter((c) => c.kind === 'recurring' && c.type === 'expense' && !c.paid);
   const next =
@@ -440,8 +427,6 @@ function FixedList() {
   );
 }
 
-/* ---------- Cuotas ---------- */
-
 function PurchaseList() {
   const { purchases, cards, categories, commitments, conv, fmt, display } = useFinance();
   const now = currentPeriod();
@@ -474,7 +459,6 @@ function PurchaseList() {
       {rs.map(({ p, prog }, i) => {
         const card = cards.find((c) => c.id === p.cardId);
         const cat = categories.find((c) => c.id === p.categoryId);
-        // Mismo color que en "Este mes": el de la tarjeta, o si no el de la categoría
         const color = card?.color ?? cat?.color ?? (p.kind === 'loan' ? palette.info : palette.primary);
         const quota = Math.round(p.total / p.installments);
         const source = card?.name ?? (p.kind === 'loan' ? 'Préstamo' : null);
@@ -567,8 +551,6 @@ function Stat({ label, value }) {
     </View>
   );
 }
-
-/* ---------- Esqueletos: misma forma que cada pestaña ---------- */
 
 function HeroSkeleton({ stats, bar }) {
   return (

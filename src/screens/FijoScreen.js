@@ -1,3 +1,4 @@
+//FijoScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
@@ -61,12 +62,10 @@ export default function RecurringForm() {
   const value = parseAmount(amount) || 0;
   const cat = categories.find((c) => c.id === categoryId);
 
-  // Solo cuentas en la moneda del fijo (el pago se registra en esa moneda)
   const accountOptions = accounts.filter((a) => !a.archived && a.currency === currency);
   const accountId = accountOptions.some((a) => a.id === pickedAccount) ? pickedAccount : null;
   const acc = accounts.find((a) => a.id === accountId);
 
-  // Borrador con lo que estás editando, para calcular el próximo y la cantidad de pagos
   const draft = {
     startPeriod: start,
     endPeriod: limited ? addMonths(start, count - 1) : null,
@@ -141,7 +140,6 @@ export default function RecurringForm() {
         }}
       />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa: así se ve en Fijos */}
         <Card style={styles.preview}>
           <View style={styles.previewRow}>
             <IconBubble
@@ -221,7 +219,6 @@ export default function RecurringForm() {
           }
         />
 
-        {/* Cuándo */}
         <View style={{ gap: space.sm }}>
           <Label>Cuándo</Label>
           <Group>
@@ -369,7 +366,6 @@ export default function RecurringForm() {
   );
 }
 
-/** Próxima fecha en que toca este fijo (desde hoy), con "en N días" si está cerca */
 function nextDue(draft, day) {
   const hoy = today();
   const from = draft.startPeriod > currentPeriod() ? draft.startPeriod : currentPeriod();
@@ -387,7 +383,6 @@ function nextDue(draft, day) {
   return null;
 }
 
-/** Aclaración chica con ícono debajo de un campo */
 function Hint({ icon, children }) {
   return (
     <View style={styles.hint}>

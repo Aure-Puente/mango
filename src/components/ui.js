@@ -1,3 +1,4 @@
+//ui:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Children, useEffect, useRef, useState } from 'react';
@@ -19,12 +20,6 @@ import { MAX_FORM, useLayout } from '@/hooks/useLayout';
 import { goBack } from '@/navigation/RootNavigation';
 import { motion, palette, radius, space } from '@/theme';
 
-/* ---------- Interacción ---------- */
-
-/**
- * Pressable que se achica apenas al tocarlo. Es el feedback táctil de toda la app:
- * tarjetas, botones propios, chips. Usa el driver nativo, así que no cuesta rendimiento.
- */
 export function PressableScale({
   children,
   style,
@@ -63,11 +58,6 @@ export function PressableScale({
   );
 }
 
-/**
- * Fondo detrás de la status bar (hora, batería): una franja del color del fondo que se funde
- * hacia abajo, para que el contenido que scrollea no se vea a través de los íconos del sistema.
- * Va una sola vez por encima de las pestañas (ver app/(tabs)/_layout.jsx).
- */
 export function StatusBarScrim({ fade = 18 }) {
   const insets = useSafeAreaInsets();
   if (!insets.top) return null;
@@ -79,10 +69,6 @@ export function StatusBarScrim({ fade = 18 }) {
   );
 }
 
-/**
- * Entrada suave: el contenido aparece subiendo unos pocos píxeles mientras se hace visible.
- * Se usa en <Screen> y <Section>, así cada pantalla "respira" al abrirse.
- */
 export function FadeIn({ children, delay = 0, distance = 10, style }) {
   const [v] = useState(() => new Animated.Value(0));
   useEffect(() => {
@@ -109,7 +95,6 @@ export function FadeIn({ children, delay = 0, distance = 10, style }) {
   );
 }
 
-/** Bloque gris que late suave mientras cargan los datos (en vez de un spinner) */
 export function Skeleton({ width = '100%', height = 14, radius: r = 8, style }) {
   const [v] = useState(() => new Animated.Value(0));
   useEffect(() => {
@@ -143,7 +128,6 @@ export function Skeleton({ width = '100%', height = 14, radius: r = 8, style }) 
   );
 }
 
-/** Filas de lista "fantasma" para estados de carga */
 export function SkeletonRows({ count = 4 }) {
   return (
     <Card style={{ paddingVertical: space.xs }}>
@@ -164,9 +148,6 @@ export function SkeletonRows({ count = 4 }) {
   );
 }
 
-/* ---------- Pantallas ---------- */
-
-/** Pantalla principal de pestaña: título grande, scroll y padding consistentes */
 export function Screen({ title, subtitle, right, children, refreshing, onRefresh, bottomInset = 0, wide }) {
   const insets = useSafeAreaInsets();
   const { max } = useLayout(wide);
@@ -200,13 +181,6 @@ export function Screen({ title, subtitle, right, children, refreshing, onRefresh
   );
 }
 
-/**
- * Manguito: el punto naranja con su hojita que marca cada sección (mismo dibujo que el logo, en miniatura).
- */
-/**
- * Manguito relleno que acompaña los títulos: la misma silueta del logo (cuello, panza y hoja),
- * pero rellena, porque en tamaños chicos el contorno se ve flojo. `size` = ancho en px.
- */
 const MANGO_BODY =
   'M52 12 C74 12 88 32 86 55 C84 78 66 92 47 90 C27 88 14 73 16 56 C18 42 28 35 36 29 C43 24 44 12 52 12 Z';
 const MANGO_LEAF = 'M55 8 C61 -1 74 -3 84 1 C80 11 68 15 55 8 Z';
@@ -220,7 +194,6 @@ export function MangoDot({ size = 14 }) {
   );
 }
 
-/** Título grande de pestaña con el manguito a la izquierda */
 export function ScreenTitle({ title, subtitle, right, style }) {
   return (
     <View style={[styles.header, style]}>
@@ -244,10 +217,6 @@ export function ScreenTitle({ title, subtitle, right, style }) {
   );
 }
 
-/**
- * Dos columnas en tablets horizontales; en teléfono y tablet vertical, una debajo de la otra.
- * Se usa dentro de <Screen wide>.
- */
 export function Columns({ left, right }) {
   const { twoCol, gap } = useLayout(true);
   if (!twoCol)
@@ -265,7 +234,6 @@ export function Columns({ left, right }) {
   );
 }
 
-/** Pantalla de formulario (se usa dentro de un Stack con header) con botón de guardar fijo abajo */
 export function FormScreen({ children, onSave, saveLabel = 'Guardar', saving, disabled, extraAction }) {
   const insets = useSafeAreaInsets();
   return (
@@ -311,8 +279,6 @@ export function FormScreen({ children, onSave, saveLabel = 'Guardar', saving, di
   );
 }
 
-/* ---------- Bloques ---------- */
-
 export function Card({ children, style, onPress }) {
   if (onPress) {
     return (
@@ -347,7 +313,6 @@ export function Section({ title, action, onAction, children, style }) {
   );
 }
 
-/** Ícono sobre un fondo suave del mismo color, en forma de "squircle" */
 export function IconBubble({ icon, color = palette.primary, size = 40 }) {
   return (
     <View
@@ -368,7 +333,7 @@ export function IconBubble({ icon, color = palette.primary, size = 40 }) {
 export function Row({
   icon,
   iconColor,
-  left, // en lugar del ícono, cualquier cosa (ej: un avatar con iniciales)
+  left,
   title,
   subtitle,
   right,
@@ -414,7 +379,6 @@ export function Row({
   );
 }
 
-/** Separador fino alineado con el texto de las filas (deja libre el ícono) */
 export function Divider() {
   return (
     <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: palette.border, marginLeft: 52 }} />
@@ -453,7 +417,6 @@ export function Empty({ icon, title, text, action, onAction }) {
   );
 }
 
-/** Barra de progreso que cambia de color según el avance (presupuestos) */
 export function Bar({ value, color, warnAt = 0.8, height = 6 }) {
   const v = Math.max(0, Math.min(1, value));
   const c =
@@ -491,7 +454,6 @@ export function Pill({ label, color = palette.textSecondary, icon }) {
   );
 }
 
-/** Rótulo chico en mayúsculas para separar bloques de un formulario */
 export function Label({ children }) {
   return (
     <Text variant="labelMedium" style={styles.label}>
@@ -512,10 +474,6 @@ export function BackButton() {
   );
 }
 
-/**
- * Botón de ícono para headers y barras (reemplaza al IconButton de Paper):
- * sin ripple, se hunde apenas y aparece un fondo suave al presionar.
- */
 export function HeaderButton({ icon, onPress, color = palette.text, accessibilityLabel, filled, badge }) {
   return (
     <PressableScale
@@ -536,10 +494,6 @@ export function HeaderButton({ icon, onPress, color = palette.text, accessibilit
   );
 }
 
-/**
- * Botón ancho en píldora (reemplaza al Button de Paper en pantallas).
- * variant: 'solid' (relleno) · 'tonal' (fondo suave) · 'outline' (borde) · 'ghost' (solo texto)
- */
 export function ActionButton({
   label,
   icon,
@@ -579,14 +533,6 @@ export function ActionButton({
   );
 }
 
-/** Botón chico en píldora para acciones dentro de pantallas ("+ Fijo", "Pagar") */
-/**
- * Botón chico tipo chip.
- * - `solid`: relleno de color (acción principal, ej: "Pagar").
- * - `tonal` con el naranja de la marca: neutro y minimalista, gris con borde fino y solo
- *   el ícono en naranja (ej: "+ Fijo" arriba a la derecha).
- * - `tonal` con otro color: se tiñe apenas con ese color (ej: "Aportar" con el color de la meta).
- */
 export function SmallButton({ label, icon, onPress, variant = 'tonal', color = palette.primary, disabled }) {
   const solid = variant === 'solid';
   const neutral = !solid && color === palette.primary;
@@ -616,7 +562,6 @@ export function SmallButton({ label, icon, onPress, variant = 'tonal', color = p
   );
 }
 
-/** Ayuda para listas dentro de tarjetas: intercala <Divider /> entre los hijos */
 export function withDividers(children) {
   const items = Children.toArray(children).filter(Boolean);
   return items.flatMap((c, i) => (i === 0 ? [c] : [<Divider key={`d-${i}`} />, c]));
@@ -723,10 +668,6 @@ export const styles = StyleSheet.create({
   },
 });
 
-/**
- * Halo cálido y suave hecho con círculos concéntricos muy transparentes.
- * (El degradado radial de SVG se ve con anillos de colores en Android.)
- */
 export function SoftHalo({ size, color = palette.primary, steps = 18, strength = 0.16 }) {
   const each = strength / steps;
   return (

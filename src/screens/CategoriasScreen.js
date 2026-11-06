@@ -1,3 +1,4 @@
+//CategoriasScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo, useState } from 'react';
@@ -18,7 +19,6 @@ export default function Categories() {
   const period = currentPeriod();
   const isExpense = kind === 'expense';
 
-  // Cuánto se movió en cada categoría este mes (gastos o ingresos, según la pestaña)
   const amounts = useMemo(() => {
     const m = new Map();
     for (const t of transactions) {
@@ -35,14 +35,12 @@ export default function Categories() {
     .sort((a, b) => b.amount - a.amount || a.c.name.localeCompare(b.c.name));
   const total = [...amounts.values()].reduce((s, v) => s + v, 0);
 
-  // Los presupuestos se guardan en pesos: para comparar, lo gastado se lleva a pesos
   const toArs = (v) => (display === 'USD' ? Math.round(v * (market.rate || 0)) : v);
   const withBudget = isExpense ? list.filter((x) => x.c.budget) : [];
   const withoutBudget = isExpense ? list.filter((x) => !x.c.budget) : list;
   const totalBudget = withBudget.reduce((s, x) => s + x.c.budget, 0);
   const totalUsed = withBudget.reduce((s, x) => s + toArs(x.amount), 0);
 
-  // Distribución del mes por categoría (para la barra de la tarjeta principal)
   const parts = list.filter((x) => x.amount > 0);
 
   const rows = (items, budgeted) => (
@@ -113,7 +111,6 @@ export default function Categories() {
           ]}
         />
 
-        {/* Resumen del mes */}
         <Card style={styles.hero}>
           <LinearGradient
             pointerEvents="none"

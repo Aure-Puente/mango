@@ -1,3 +1,4 @@
+//TabBar:
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
@@ -9,15 +10,7 @@ import { motion, palette, radius, space } from '@/theme';
 const PILL_W = 52;
 const PILL_H = 32;
 
-/**
- * Barra de pestañas propia de Mango.
- * - Flota sobre el fondo como una cápsula, con borde fino (sin sombra ni ripple).
- * - Una "píldora" suave se desliza detrás del ícono activo con un resorte.
- * - Al presionar, el ícono se hunde apenas y vibra suave al cambiar de pestaña.
- * Se renderiza en el flujo (no absoluta), así que no tapa el contenido de las pantallas.
- */
 export function TabBar({ state, descriptors, insets, emitter, navigateToTab, navigation }) {
-  // Expo Router (SDK 58) pasa `emitter` y `navigateToTab`; versiones anteriores pasaban `navigation`
   const emit = (e) => (emitter ?? navigation).emit(e);
   const goTo = (route) =>
     navigateToTab ? navigateToTab(route.key) : navigation.navigate(route.name, route.params);
@@ -38,7 +31,6 @@ export function TabBar({ state, descriptors, insets, emitter, navigateToTab, nav
     if (!tabW) return;
     const to = index * tabW + (tabW - PILL_W) / 2;
     if (!placed.current) {
-      // Primera vez: la ubicamos sin animar para que no "viaje" al abrir la app
       x.setValue(to);
       placed.current = true;
       return;
@@ -91,7 +83,6 @@ export function TabBar({ state, descriptors, insets, emitter, navigateToTab, nav
           );
         })}
       </View>
-      {/* Se oscurece junto con la pantalla cuando el menú del mango está abierto */}
       <FabDim />
     </View>
   );

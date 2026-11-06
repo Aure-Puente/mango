@@ -1,3 +1,4 @@
+//MetasScreen:
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
@@ -24,13 +25,11 @@ import { formatMoney, parseAmount, percent } from '@/lib/money';
 import { navigate } from '@/navigation/RootNavigation';
 import { palette, space } from '@/theme';
 
-/** "2027-05" → "may 2027" */
 const shortMonthYear = (p) => `${periodShort(p).split(' ')[0].toLowerCase()} ${p.slice(0, 4)}`;
 
 export default function Goals() {
   const { goals, contributeGoal, conv, fmt, display } = useFinance();
 
-  // Cuánto falta y cuánto apartar por mes en cada meta
   const now = currentPeriod();
   const rows = goals.map((g) => {
     const ratio = g.target ? g.saved / g.target : 0;
@@ -39,7 +38,6 @@ export default function Goals() {
     const perMonth = ratio < 1 && monthsLeft && monthsLeft > 0 ? Math.ceil(left / monthsLeft) : null;
     return { g, ratio, left, perMonth };
   });
-  // Resumen general, en la moneda que estás mirando
   const totalSaved = rows.reduce((s, r) => s + conv(r.g.saved, r.g.currency), 0);
   const totalTarget = rows.reduce((s, r) => s + conv(r.g.target, r.g.currency), 0);
   const totalPerMonth = rows.reduce((s, r) => s + (r.perMonth ? conv(r.perMonth, r.g.currency) : 0), 0);
@@ -85,7 +83,6 @@ export default function Goals() {
           </Card>
         ) : (
           <View style={{ gap: space.md }}>
-            {/* Resumen de todas las metas */}
             <Card style={styles.hero}>
               <LinearGradient
                 pointerEvents="none"
@@ -220,10 +217,6 @@ export default function Goals() {
   );
 }
 
-/**
- * Diálogo para sumar o retirar plata de una meta: contexto arriba, el monto como protagonista,
- * una vista previa de cómo queda la meta y un único botón con el color de la meta.
- */
 function ContributeDialog({ goal, mode, onMode, amount, onAmount, onConfirm, onDismiss }) {
   const [busy, setBusy] = useState(false);
   if (!goal) return null;
@@ -250,7 +243,6 @@ function ContributeDialog({ goal, mode, onMode, amount, onAmount, onConfirm, onD
   return (
     <Portal>
       <Dialog visible onDismiss={busy ? undefined : onDismiss} style={[dialogStyle, styles.dialog]}>
-        {/* Contexto: qué meta y cómo viene */}
         <View style={styles.dHead}>
           <IconBubble icon={goal.icon ?? 'piggy-bank-outline'} color={goal.color} size={44} />
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -274,7 +266,6 @@ function ContributeDialog({ goal, mode, onMode, amount, onAmount, onConfirm, onD
           />
           <AmountInput value={amount} onChange={onAmount} currency={goal.currency} autoFocus />
 
-          {/* Cómo quedaría la meta */}
           <View style={styles.preview}>
             {tooMuch ? (
               <View style={styles.previewRow}>

@@ -1,3 +1,4 @@
+//AuthContext:
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -12,7 +13,6 @@ import { signInWithGoogle, signOutGoogle } from '@/lib/google';
 
 const Ctx = createContext(null);
 
-/** Traduce los errores de Firebase a mensajes entendibles */
 export function authErrorMessage(e) {
   const code = e?.code ?? '';
   const map = {

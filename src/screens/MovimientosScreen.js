@@ -1,3 +1,4 @@
+//MovimientosScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { useEffect, useMemo, useState } from 'react';
@@ -26,7 +27,6 @@ import { palette, radius, space } from '@/theme';
 
 const WEEKDAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-/** Encabezado del día: "Ayer · 5 nov", "Miércoles 4 nov" */
 function dayTitle(d) {
   const date = fromDateStr(d);
   const short = `${date.getDate()} ${MONTHS_SHORT[date.getMonth()].toLowerCase()}`;
@@ -49,7 +49,6 @@ export default function Movements() {
   const [categoryId, setCategoryId] = useState(params.category ?? null);
   const [showFilters, setShowFilters] = useState(!!params.account);
 
-  // Llegar filtrado desde otra pantalla (ej: una cuenta, o una categoría desde Análisis)
   useEffect(() => {
     if (params.account) {
       setAccountId(params.account);
@@ -87,7 +86,6 @@ export default function Movements() {
       map.set(t.date, arr);
     }
     return [...map.entries()].map(([date, data]) => {
-      // Neto del día (ingresos − gastos) en la moneda que se está mirando
       let net = 0;
       for (const t of data) {
         if (t.type === 'income') net += conv(t.amount, t.currency, t.rate);
@@ -180,7 +178,6 @@ export default function Movements() {
               ]}
             />
 
-            {/* Filtros extra */}
             {showFilters ? (
               <Card style={styles.filters}>
                 <View style={{ gap: space.sm }}>
@@ -222,7 +219,6 @@ export default function Movements() {
                 </View>
               </Card>
             ) : activeFilters ? (
-              // Con el panel cerrado, los filtros activos quedan a la vista y se sacan con un toque
               <View style={styles.activeRow}>
                 {filterAcc ? (
                   <FilterChip
@@ -348,7 +344,6 @@ function Total({ label, value, color, icon, valueColor }) {
   );
 }
 
-/** Filtro activo con su "x" para sacarlo */
 function FilterChip({ label, color, icon, onClear }) {
   return (
     <Pressable
@@ -370,7 +365,6 @@ function FilterChip({ label, color, icon, onClear }) {
   );
 }
 
-/** Esqueletos con la misma forma que lo que se muestra: totales y días con sus movimientos */
 function TotalsSkeleton() {
   return (
     <View style={styles.totals}>

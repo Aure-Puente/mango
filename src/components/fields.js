@@ -1,3 +1,4 @@
+//fields:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Children, useEffect, useRef, useState } from 'react';
@@ -10,7 +11,6 @@ import { palette, radius, space, swatches } from '@/theme';
 
 const tap = () => Haptics.selectionAsync().catch(() => {});
 
-/** Campo de texto: superficie suave, borde casi invisible y acento mango al enfocar */
 export function Field({ style, contentStyle, outlineStyle, ...props }) {
   return (
     <TextInput
@@ -31,11 +31,6 @@ export function Field({ style, contentStyle, outlineStyle, ...props }) {
 Field.Icon = TextInput.Icon;
 Field.Affix = TextInput.Affix;
 
-/** Monto grande centrado, protagonista del formulario */
-/**
- * `size`: tamaño del número (56 por defecto). Con `shrinkEmpty`, vacío se ve más chico
- * para que un campo opcional no se robe la atención.
- */
 export function AmountInput({
   value,
   onChange,
@@ -92,14 +87,6 @@ export function AmountInput({
   );
 }
 
-/**
- * Control segmentado propio (reemplaza a SegmentedButtons de Paper):
- * una píldora se desliza bajo la opción elegida, igual que en la barra de pestañas.
- * `compact`: ancho justo para las opciones en vez de ocupar todo el renglón.
- * Cada opción acepta `icon` y `color`. Con el naranja de la marca (o sin color) la píldora es neutra:
- * un gris un poco más claro, con borde fino, que "flota" sobre el fondo. Otros colores
- * (ej: rojo de gasto, verde de ingreso) tiñen la píldora porque ahí el color dice algo.
- */
 export function Segmented({ value, onChange, options, compact, style }) {
   const [w, setW] = useState(0);
   const [x] = useState(() => new Animated.Value(0));
@@ -177,7 +164,6 @@ export function Segmented({ value, onChange, options, compact, style }) {
   );
 }
 
-/** Buscador minimalista (reemplaza al Searchbar de Paper) */
 export function SearchField({ value, onChangeText, placeholder = 'Buscar' }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -208,8 +194,6 @@ export function SearchField({ value, onChangeText, placeholder = 'Buscar' }) {
   );
 }
 
-/** Selector horizontal de chips (cuentas, categorías, tarjetas) */
-/** `tintIcons`: los íconos de las opciones no elegidas también llevan su color (más suave) */
 export function ChipSelect({ options, value, onChange, wrap, allowNone, tintIcons }) {
   const chips = options.map((o) => {
     const on = o.value === value;
@@ -287,7 +271,6 @@ export function DateField({ value, onChange, label = 'Fecha' }) {
   );
 }
 
-/** Botón redondo chico (flechas del mes, más/menos del stepper) */
 function RoundButton({ icon, onPress, disabled, size = 36 }) {
   return (
     <Pressable
@@ -332,7 +315,6 @@ export function MonthSwitcher({ value, onChange, min, max }) {
   );
 }
 
-/** Fila compacta para elegir un mes: "Empieza   ‹ Noviembre 2026 ›" (va dentro de un Group) */
 export function MonthStepper({ label, value, onChange, min, max }) {
   return (
     <View style={styles.inlineField}>
@@ -485,7 +467,6 @@ export const CATEGORY_ICONS = [
   'dots-horizontal',
 ];
 
-/** Íconos para metas de ahorro */
 export const GOAL_ICONS = [
   'piggy-bank-outline',
   'airplane',
@@ -531,7 +512,6 @@ export function IconPicker({ value, onChange, color, icons = CATEGORY_ICONS }) {
   );
 }
 
-/** Bloque agrupado tipo "ajustes": las filas de adentro se separan solas con una línea fina */
 export function Group({ children }) {
   const items = Children.toArray(children).filter(Boolean);
   return (

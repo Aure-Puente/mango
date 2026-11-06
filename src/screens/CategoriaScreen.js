@@ -1,3 +1,4 @@
+//CategoriaScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
@@ -14,7 +15,6 @@ import { centsToInput, formatMoney, parseAmount, percent } from '@/lib/money';
 import { goBack } from '@/navigation/RootNavigation';
 import { palette, space } from '@/theme';
 
-// Ícono por defecto hasta que elijas uno (así siempre hay uno marcado en la grilla)
 const DEFAULT_ICON = { expense: 'dots-horizontal', income: 'cash-plus' };
 const WEEKS_PER_MONTH = 4.345;
 
@@ -36,7 +36,6 @@ export default function CategoryForm() {
   const isExpense = kind === 'expense';
   const budgetCents = isExpense ? parseAmount(budget) || 0 : 0;
 
-  // Lo movido este mes en esta categoría, en pesos (los presupuestos son en pesos)
   const period = currentPeriod();
   const { spent, txCount } = (() => {
     if (!existing) return { spent: 0, txCount: 0 };
@@ -103,7 +102,6 @@ export default function CategoryForm() {
         }}
       />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa: así se ve en Categorías y presupuestos */}
         <Card style={styles.preview}>
           <View style={styles.previewRow}>
             <IconBubble icon={icon} color={color} />
@@ -233,7 +231,6 @@ export default function CategoryForm() {
   );
 }
 
-/** Aclaración chica con ícono debajo de un campo */
 function Hint({ icon, color, children }) {
   return (
     <View style={styles.hint}>

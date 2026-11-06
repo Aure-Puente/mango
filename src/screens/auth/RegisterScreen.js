@@ -1,3 +1,4 @@
+//RegisterScreen:
 import { useState } from 'react';
 import { Text } from 'react-native-paper';
 import { AuthError, AuthLayout, GoogleButton, OrDivider } from '@/components/AuthForm';

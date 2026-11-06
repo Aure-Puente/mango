@@ -1,3 +1,4 @@
+//DeudaScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
@@ -15,7 +16,6 @@ import { centsToInput, formatMoney, parseAmount } from '@/lib/money';
 import { goBack, replace } from '@/navigation/RootNavigation';
 import { palette, radius, space } from '@/theme';
 
-/** Fecha 30 días después de hoy, para arrancar el "para devolver el" */
 function inAMonth() {
   const d = new Date();
   d.setDate(d.getDate() + 30);
@@ -43,7 +43,6 @@ export default function DebtForm() {
   const value = parseAmount(amount) || 0;
   const paid = existing ? debtStatus(existing).paid : 0;
 
-  // Solo cuentas en la moneda de la deuda; por defecto, la primera
   const accountOptions = accounts.filter((a) => !a.archived && a.currency === currency);
   const accountId =
     pickedAccount === undefined
@@ -53,7 +52,6 @@ export default function DebtForm() {
         : null;
   const acc = accounts.find((a) => a.id === accountId);
 
-  // Nombres ya usados, para completar con un toque
   const names = [...new Set(debts.map((d) => d.person.trim()))]
     .filter((n) => n && n.toLowerCase() !== person.trim().toLowerCase())
     .filter((n) => !person.trim() || n.toLowerCase().startsWith(person.trim().toLowerCase()))
@@ -99,7 +97,6 @@ export default function DebtForm() {
     <>
       <ScreenOptions options={{ title: existing ? 'Editar' : owed ? 'Me deben' : 'Debo' }} />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa */}
         <Card style={styles.preview}>
           <View style={styles.previewRow}>
             <PersonAvatar name={name || '?'} size={44} />

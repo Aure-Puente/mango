@@ -1,3 +1,4 @@
+//notifications:
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { addMonths, currentPeriod, fromDateStr } from './dates';
@@ -31,7 +32,6 @@ export async function ensureNotificationPermission() {
   return req.granted;
 }
 
-/** Fecha de aviso: el día anterior al vencimiento a las 10 hs */
 function reminderDate(due) {
   const d = fromDateStr(due);
   d.setDate(d.getDate() - 1);
@@ -39,10 +39,6 @@ function reminderDate(due) {
   return d.getTime() > Date.now() ? d : null;
 }
 
-/**
- * Reprograma todos los recordatorios de vencimientos de este mes y el siguiente.
- * Se llama cada vez que cambian los fijos, cuotas, tarjetas o deudas.
- */
 export async function rescheduleReminders(recurring, purchases, cards, debts = []) {
   if (Platform.OS === 'web') return;
   const perm = await Notifications.getPermissionsAsync();
@@ -56,7 +52,6 @@ export async function rescheduleReminders(recurring, purchases, cards, debts = [
   for (const p of periods) {
     const cs = commitmentsFor(p, recurring, purchases, cards).filter((c) => !c.paid && c.type === 'expense');
 
-    // Fijos con recordatorio activado
     for (const c of cs) {
       if (c.kind !== 'recurring' || !remindIds.has(c.refId)) continue;
       const date = reminderDate(c.dueDate);
@@ -71,7 +66,6 @@ export async function rescheduleReminders(recurring, purchases, cards, debts = [
       });
     }
 
-    // Resumen de cada tarjeta
     for (const card of cards) {
       const items = cs.filter((c) => c.cardId === card.id);
       if (items.length === 0) continue;
@@ -89,7 +83,6 @@ export async function rescheduleReminders(recurring, purchases, cards, debts = [
     }
   }
 
-  // Deudas con fecha para devolver: aviso el día anterior
   for (const d of debts) {
     if (!d.dueDate) continue;
     const { pending } = debtStatus(d);
@@ -110,7 +103,6 @@ export async function rescheduleReminders(recurring, purchases, cards, debts = [
   }
 }
 
-/** Aviso inmediato (por ejemplo, al pasar el 80% de un presupuesto) */
 export async function notifyNow(title, body) {
   if (Platform.OS === 'web') return;
   const perm = await Notifications.getPermissionsAsync();

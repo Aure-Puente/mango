@@ -1,3 +1,4 @@
+//MetaScreen:
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -41,7 +42,6 @@ export default function GoalForm() {
   const [icon, setIcon] = useState(existing?.icon ?? 'piggy-bank-outline');
   const [saving, setSaving] = useState(false);
 
-  // Valores en vivo para la vista previa y el cálculo por mes
   const tCents = parseAmount(target) ?? 0;
   const sCents = parseAmount(saved) ?? 0;
   const ratio = tCents ? sCents / tCents : 0;
@@ -101,7 +101,6 @@ export default function GoalForm() {
         }}
       />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa: así se va a ver en la lista */}
         <Card style={styles.preview}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
             <IconBubble icon={icon} color={color} />
@@ -180,7 +179,6 @@ export default function GoalForm() {
           ) : null}
         </View>
 
-        {/* Apariencia: color e ícono en un solo bloque */}
         <View>
           <Label>Apariencia</Label>
           <Group>
@@ -220,7 +218,6 @@ export default function GoalForm() {
   );
 }
 
-/** Aclaración chica con ícono debajo de un campo */
 function Hint({ icon, color, children }) {
   return (
     <View style={styles.hint}>

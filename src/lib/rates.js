@@ -1,7 +1,8 @@
+//rates:
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CACHE_KEY = 'mango.market.v1';
-const TTL = 1000 * 60 * 30; // 30 minutos
+const TTL = 1000 * 60 * 30;
 
 async function getJson(url) {
   const res = await fetch(url, { headers: { Accept: 'application/json' } });
@@ -9,23 +10,19 @@ async function getJson(url) {
   return res.json();
 }
 
-/** Cotizaciones actuales: https://dolarapi.com */
 async function fetchQuotes() {
   return getJson('https://dolarapi.com/v1/dolares');
 }
 
-/** Histórico diario de un tipo de dólar: https://argentinadatos.com */
 async function fetchHistory(casa) {
   const rows = await getJson(`https://api.argentinadatos.com/v1/cotizaciones/dolares/${casa}`);
   const map = {};
-  // Las filas vienen ordenadas por fecha; nos quedamos con el último valor de cada mes
   for (const r of rows) {
     if (r?.fecha && r.venta) map[r.fecha.slice(0, 7)] = r.venta;
   }
   return map;
 }
 
-/** Inflación mensual (INDEC): https://argentinadatos.com */
 async function fetchInflation() {
   const rows = await getJson('https://api.argentinadatos.com/v1/finanzas/indices/inflacion');
   const map = {};
@@ -76,10 +73,6 @@ export const RATE_LABEL = {
   bolsa: 'MEP',
 };
 
-/**
- * Factor para llevar un monto del período `from` a pesos del período `to`
- * usando la inflación mensual acumulada.
- */
 export function inflationFactor(inflation, from, to) {
   if (from >= to) return 1;
   let f = 1;

@@ -1,3 +1,4 @@
+//finance:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
@@ -15,7 +16,6 @@ import { ChipSelect, DateField } from './fields';
 import { MangoFab } from './MangoFab';
 import { ActionButton, IconBubble, Row } from './ui';
 
-/** Diálogos con ancho máximo para que no se estiren en tablets */
 export const dialogStyle = {
   backgroundColor: palette.surface,
   borderRadius: radius.lg,
@@ -34,13 +34,6 @@ export const ACCOUNT_ICON = {
   other: 'wallet-outline',
 };
 
-/**
- * Fila de un movimiento.
- * `hideDate`: en listas agrupadas por día la fecha ya está en el encabezado, así que no se repite.
- * `compact`: sin el nombre de la cuenta cuando hay categoría (para Inicio).
- * Si el título es la nota, abajo se muestra la categoría ("Comida · Mercado Pago").
- * Los montos en dólares muestran su equivalente en pesos (≈ $ 24.200).
- */
 export function TxRow({ tx, onPress, hideDate, compact }) {
   const { categories, accounts, settings } = useData();
   const { rate } = useMarket();
@@ -52,7 +45,6 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
   let icon = cat?.icon ?? 'tag-off-outline';
   let color = cat?.color ?? palette.textSecondary;
   let title = tx.note || cat?.name || 'Sin categoría';
-  // compact: sin la cuenta si hay categoría ("Comida · Ayer"), para que no se corte en Inicio
   let subtitle = [
     tx.note && cat ? cat.name : null,
     compact && tx.note && cat ? null : (acc?.name ?? 'Cuenta borrada'),
@@ -70,7 +62,6 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
   } else if (tx.type === 'expense') {
     amount = '−' + amount;
   } else if (tx.source?.kind === 'debt') {
-    // Préstamo o devolución: entra o sale plata de una cuenta, con otra persona del otro lado
     const inbound = !tx.accountId;
     const own = inbound ? to : acc;
     icon = inbound ? 'hand-coin-outline' : 'account-arrow-right-outline';
@@ -94,7 +85,6 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
     amountColor = palette.textSecondary;
   }
 
-  // Dólares: también cuánto es en pesos (con la cotización del día del movimiento)
   const r = tx.rate || rate;
   if (!rightSub && tx.currency === 'USD' && r && settings?.displayCurrency !== 'USD') {
     rightSub = `≈ ${formatMoney(Math.round(tx.amount * r), 'ARS')}`;
@@ -112,7 +102,6 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
       onPress={
         onPress ??
         (() =>
-          // Los movimientos de una deuda se manejan desde la deuda (así no se desincronizan)
           tx.source?.kind === 'debt'
             ? navigate('DeudaDetalle', { id: tx.source.id })
             : navigate('Movimiento', { id: tx.id }))
@@ -121,10 +110,6 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
   );
 }
 
-/**
- * Botón flotante para cargar rápido. Va solo en Inicio: se dibuja dentro de la pantalla
- * (sin Portal) para que no aparezca encima de las otras pestañas.
- */
 export function QuickAddFab() {
   const focused = useIsFocused();
   if (!focused) return null;
@@ -160,7 +145,6 @@ export function QuickAddFab() {
   );
 }
 
-/** Cuándo vence (o cuándo se cobra), en palabras y con color según la urgencia */
 export function dueInfo(dueDate, income = false) {
   const d = daysUntil(dueDate);
   const day = Number(dueDate.slice(8, 10));
@@ -168,18 +152,12 @@ export function dueInfo(dueDate, income = false) {
   if (d < 0) return { text: `${past} hace ${-d} ${d === -1 ? 'día' : 'días'}`, color: palette.expense };
   if (d === 0) return { text: `${future} hoy`, color: palette.warning };
   if (d === 1) return { text: `${future} mañana`, color: palette.warning };
-  // Cerca: "en 4 días" (lo que importa); lejos: "el 15". Así entra en una línea.
   if (d <= 7)
     return { text: `${future} en ${d} días`, color: d <= 3 ? palette.warning : palette.textSecondary };
   if (d <= 31) return { text: `${future} el ${day}`, color: palette.textSecondary };
   return { text: `${future} el ${dateLabel(dueDate)}`, color: palette.textSecondary };
 }
 
-/**
- * `compact`: el vencimiento va a la derecha, debajo del monto (para listas angostas como Inicio),
- * así el detalle de la izquierda ("Cuota 1 de 12") no se corta.
- */
-/** "Vence en 4 días" → "En 4 días", "Venció hace 2 días" → "Hace 2 días" */
 const shortDue = (t) => {
   const r = t.replace(/^(Venció|Vence|Se cobraba|Se cobra) /, '');
   return r[0].toUpperCase() + r.slice(1);
@@ -254,12 +232,6 @@ export function CommitmentRow({ c, onPress, compact }) {
   );
 }
 
-/**
- * Diálogo para marcar como pagado/cobrado uno o varios compromisos
- * (un fijo, una cuota o el resumen completo de una tarjeta).
- * Si ya están pagados, ofrece desmarcarlos (borra el movimiento que se generó).
- */
-/** "de hoy", "de ayer", "del 5 nov" */
 const whenPaid = (d) => {
   const l = dateLabel(d);
   return l === 'Hoy' || l === 'Ayer' ? `de ${l.toLowerCase()}` : `del ${l}`;
@@ -285,8 +257,6 @@ export function PayDialog({ items, title, onDismiss }) {
   const total = pending.reduce((s, i) => s + i.amount, 0);
   const isSummary = items.length > 1;
 
-  // Solo cuentas en la moneda del pago (el movimiento se guarda en esa moneda);
-  // si no hay ninguna, se muestran todas
   const sameCur = active.filter((a) => a.currency === currency);
   const options = sameCur.length ? sameCur : active;
   const selected =
@@ -297,7 +267,6 @@ export function PayDialog({ items, title, onDismiss }) {
   const selectedAcc = active.find((a) => a.id === selected);
   const after = selectedAcc ? (balances[selectedAcc.id] ?? 0) + (isIncome ? total : -total) : null;
 
-  // Encabezado: qué es y cuándo vence
   const card = first.cardId ? cards.find((c) => c.id === first.cardId) : null;
   const cat = categories.find((c) => c.id === first.categoryId);
   const icon = isSummary
@@ -317,7 +286,6 @@ export function PayDialog({ items, title, onDismiss }) {
       : [isIncome ? 'Ingreso fijo' : 'Gasto fijo', first.detail].filter(Boolean).join(' · ');
   const due = allPaid ? null : dueInfo(first.dueDate, isIncome);
 
-  // Para desmarcar: el movimiento que se había generado
   const txs = items.map((i) => transactions.find((t) => t.id === i.txId)).filter(Boolean);
   const tx = txs[0];
   const txAcc = tx ? accounts.find((a) => a.id === tx.accountId) : null;
@@ -327,7 +295,6 @@ export function PayDialog({ items, title, onDismiss }) {
     setSaving(true);
     try {
       if (allPaid) {
-        // Guardamos cuenta y fecha del pago para poder rehacerlo igual si tocan "Deshacer"
         const prev = txs[0];
         for (const i of items) await unpayCommitment(i);
         toast.show('Se desmarcó el pago', {
@@ -411,7 +378,6 @@ export function PayDialog({ items, title, onDismiss }) {
     <Portal>
       <Dialog visible onDismiss={saving ? undefined : onDismiss} style={dialogStyle}>
         <View style={styles.dialogBody}>
-          {/* Qué estás pagando */}
           <View style={styles.dialogHead}>
             <IconBubble icon={icon} color={color} size={44} />
             <View style={{ flex: 1, minWidth: 0 }}>
@@ -429,7 +395,6 @@ export function PayDialog({ items, title, onDismiss }) {
             {formatMoney(total, currency)}
           </Text>
 
-          {/* Resumen de tarjeta: qué incluye */}
           {isSummary ? (
             <View style={styles.dialogItems}>
               {pending.slice(0, 4).map((i) => (

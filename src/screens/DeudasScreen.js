@@ -1,3 +1,4 @@
+//DeudasScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,7 +23,6 @@ export default function Debts() {
 
   const totals = debtTotals(debts, conv);
   const mine = debts.filter((d) => d.direction === dir);
-  // Activas: primero las que tienen fecha (la más próxima arriba), después las demás por fecha de préstamo
   const active = mine
     .filter((d) => !debtStatus(d).done)
     .sort((a, b) =>
@@ -73,7 +73,6 @@ export default function Debts() {
           ]}
         />
 
-        {/* Resumen */}
         <Card style={styles.hero}>
           <LinearGradient
             pointerEvents="none"
@@ -101,7 +100,6 @@ export default function Debts() {
                 ? 'Nadie te debe nada'
                 : 'No le debés nada a nadie'}
           </Text>
-          {/* El otro lado, a un toque */}
           {(owed ? totals.owe : totals.owed) > 0 ? (
             <Pressable
               onPress={() => setDir(owed ? 'owe' : 'owed')}

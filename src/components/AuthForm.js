@@ -1,3 +1,4 @@
+//AuthForm:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
@@ -9,11 +10,6 @@ import { PressableScale, SoftHalo } from './ui';
 
 const HALO = 300;
 
-/**
- * Pantalla de login / registro. Arriba, el mango con su halo y "mango" debajo: la misma
- * composición con la que termina la splash, así entrar se siente como una continuación.
- * Debajo, el formulario en una columna angosta, sin títulos que asuman si ya tenés cuenta.
- */
 export function AuthLayout({ subtitle, children, footer }) {
   const insets = useSafeAreaInsets();
   const [logoRef, logoVisible] = useHandoffTarget('login');
@@ -33,14 +29,11 @@ export function AuthLayout({ subtitle, children, footer }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.column}>
-          {/* Marca + formulario, centrados en el alto disponible: el espacio libre se reparte
-              arriba y abajo en vez de quedar todo junto antes del pie */}
           <View style={styles.main}>
             <View style={styles.hero}>
               <View style={styles.halo} pointerEvents="none">
                 <SoftHalo size={HALO} />
               </View>
-              {/* Oculto hasta que llega el mango de la splash (ver lib/handoff) */}
               <View ref={logoRef} collapsable={false} style={{ opacity: logoVisible ? 1 : 0 }}>
                 <Logo size={96} />
               </View>
@@ -62,7 +55,6 @@ export function AuthLayout({ subtitle, children, footer }) {
   );
 }
 
-/** Enlace chico alineado a la derecha (ej: "¿Olvidaste tu contraseña?") */
 export function AuthLink({ label, onPress }) {
   return (
     <Pressable
@@ -114,7 +106,6 @@ export function OrDivider() {
   );
 }
 
-/** Mensaje de error del formulario (reemplaza al HelperText de Paper) */
 export function AuthError({ children }) {
   if (!children) return null;
   return (
@@ -129,7 +120,6 @@ export function AuthError({ children }) {
 
 const styles = StyleSheet.create({
   column: { width: '100%', maxWidth: 420, alignSelf: 'center', flexGrow: 1 },
-  // Un poco más abajo del centro exacto: el bloque se ve mejor apoyado que flotando arriba
   main: { flexGrow: 1, justifyContent: 'center', paddingTop: space.xl, paddingBottom: space.lg },
   hero: { alignItems: 'center', marginBottom: space.xxl, paddingTop: space.lg },
   halo: { position: 'absolute', top: 48 - HALO / 2 + space.lg, width: HALO, height: HALO },
@@ -141,7 +131,6 @@ const styles = StyleSheet.create({
     color: palette.text,
   },
   subtitle: { color: palette.textSecondary, marginTop: space.xs, textAlign: 'center' },
-  // Blanco: el botón de Google estándar, el que más se reconoce
   google: {
     height: 52,
     borderRadius: radius.pill,

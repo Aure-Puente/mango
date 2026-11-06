@@ -1,8 +1,8 @@
+//ReminderSync:
 import { useEffect, useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import { ensureNotificationPermission, rescheduleReminders } from '@/lib/notifications';
 
-/** Mantiene los recordatorios de vencimientos sincronizados con los datos */
 export function ReminderSync() {
   const { ready, settings, recurring, purchases, cards, debts } = useData();
   const asked = useRef(false);
@@ -15,7 +15,6 @@ export function ReminderSync() {
       ensureNotificationPermission().catch(() => {});
     }
     if (timer.current) clearTimeout(timer.current);
-    // Espera un momento para no reprogramar en cada cambio seguido
     timer.current = setTimeout(() => {
       rescheduleReminders(recurring, purchases, cards, debts).catch((e) => console.warn('Recordatorios', e));
     }, 1500);

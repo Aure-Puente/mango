@@ -1,3 +1,4 @@
+//AnalisisScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -13,14 +14,10 @@ import { formatMoney, percent } from '@/lib/money';
 import { navigate } from '@/navigation/RootNavigation';
 import { chartColors, palette, space } from '@/theme';
 
-/** Padding de <Card> (ver ui.jsx): se descuenta del ancho de los gráficos */
 const CARD_PAD = space.lg + 4;
 
-// Función (no objeto compartido): gifted-charts clona y muta los estilos, y React Native
-// congela en desarrollo los estilos que ya usó, así que cada uso necesita un objeto nuevo.
 const axisText = () => ({ color: palette.textSecondary, fontSize: 10, fontFamily: 'Inter_400Regular' });
 
-/** Paso "redondo" para el eje Y (1, 1.5, 2, 2.5, 3, 5… × 10ⁿ): así las marcas son 0 · 1k · 2k · 3k */
 function niceStep(raw) {
   if (!raw || raw <= 0) return 1;
   const p = 10 ** Math.floor(Math.log10(raw));
@@ -28,7 +25,6 @@ function niceStep(raw) {
   const nice = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find((x) => n <= x) ?? 10;
   return nice * p;
 }
-/** Escala del eje Y con `sections` marcas redondas que cubren `max` */
 function niceScale(max, sections) {
   const step = niceStep(max / sections);
   return { maxValue: step * sections, stepValue: step, noOfSections: sections };
@@ -38,10 +34,8 @@ export default function Analysis() {
   const f = useFinance();
   const { colWidth } = useLayout(true);
   const { settings, market, display, conv, fmt } = f;
-  // Ancho útil del gráfico: columna - padding de la tarjeta - etiquetas del eje Y
   const chartW = colWidth - CARD_PAD * 2 - 44;
 
-  // 'mes' (predeterminado) = solo el mes actual; '6' / '12' = últimos meses
   const [months, setMonths] = useState('mes');
   const isMonth = months === 'mes';
   const span = isMonth ? 1 : Number(months);
@@ -51,19 +45,15 @@ export default function Analysis() {
 
   const now = currentPeriod();
   const periods = useMemo(() => periodRange(addMonths(now, -(span - 1)), now), [now, span]);
-  // El patrimonio siempre muestra una evolución: con 'Este mes' usamos los últimos 6
   const nwSpan = isMonth ? 6 : span;
   const nwPeriods = useMemo(() => periodRange(addMonths(now, -(nwSpan - 1)), now), [now, nwSpan]);
-  // La inflación solo tiene sentido al comparar meses
   const adjust = settings.inflationAdjust && display === 'ARS' && !isMonth;
   const k = (p) => (adjust ? market.realFactor(p) : 1);
 
-  /* Ingresos vs gastos */
   const monthly = useMemo(
     () =>
       periods.map((p) => {
         const s = f.summary(p);
-        // Meses pasados: solo lo real. Mes actual: real + pendiente.
         const isNow = p === now;
         const inc = Math.round((s.income + (isNow ? s.pendingIncome : 0)) * k(p));
         const exp = Math.round((s.expense + (isNow ? s.pendingExpense : 0)) * k(p));
@@ -81,7 +71,6 @@ export default function Analysis() {
   const avgRate = totInc ? withData.reduce((s, m) => s + m.save, 0) / totInc : null;
   const best = withData.reduce((b, m) => (!b || m.save > b.save ? m : b), null);
 
-  /* Este mes: lo cargado + lo pendiente, y comparación con el promedio de los 3 meses anteriores */
   const cur = monthly[monthly.length - 1] ?? { inc: 0, exp: 0, save: 0 };
   const curSummary = f.summary(now);
   const curRate = cur.inc ? cur.save / cur.inc : null;
@@ -93,15 +82,12 @@ export default function Analysis() {
     .filter((v) => v > 0);
   const prevAvg = prevExp.length ? Math.round(prevExp.reduce((a, b) => a + b, 0) / prevExp.length) : 0;
   const vsAvg = prevAvg && cur.exp ? cur.exp / prevAvg - 1 : null;
-  // Gasto real (sin lo pendiente) dividido por los días que van del mes
   const daily = Math.round((curSummary.expense * k(now)) / new Date().getDate());
 
-  // Los gráficos arrancan en el primer mes con datos (sin meses vacíos adelante)
   const firstIdx = monthly.findIndex((m) => m.inc || m.exp);
   const chartMonths = firstIdx >= 0 ? monthly.slice(firstIdx) : [];
   const fewMonths = !isMonth && chartMonths.length > 0 && chartMonths.length < 3;
 
-  // Con 12 meses, una etiqueta cada dos para que no se pisen
   const showLabel = (i) => chartMonths.length <= 6 || i % 2 === (chartMonths.length - 1) % 2;
   const barData = chartMonths.flatMap((m, i) => [
     {
@@ -121,7 +107,6 @@ export default function Analysis() {
     labelWidth: 44,
     labelTextStyle: axisText(),
   }));
-  // Ancho de barra para que entren todos los meses (par de barras + separación) sin cortarse
   const barW = Math.max(
     3.5,
     Math.min(
@@ -129,19 +114,15 @@ export default function Analysis() {
       (chartW - 48 - 3 * Math.max(1, chartMonths.length)) / (Math.max(1, chartMonths.length) * 3.4),
     ),
   );
-  // Espacio entre grupos para que las barras ocupen todo el ancho (en tablets la tarjeta es más ancha)
   const n = Math.max(1, chartMonths.length);
-  // Se descuenta el espacio inicial (8) y un margen final para que la última barra no se corte
   const pairSpacing = Math.max(barW * 1.4, (chartW - 48 - n * (barW * 2 + 3)) / n);
   const saveSpacing = Math.max(barW * 1.6, (chartW - 48 - n * barW * 1.6) / n);
 
-  /* Categorías */
   const cats = useMemo(
     () => spendingByCategory(catPeriod, f.transactions, f.categories, conv, display, market.rate),
     [catPeriod, f.transactions, f.categories, conv, display, market.rate],
   );
   const catTotal = cats.reduce((s, c) => s + c.amount, 0);
-  // Mes anterior, para comparar cada categoría (▲ 12% / ▼ 5%)
   const prevCats = useMemo(() => {
     const rows = spendingByCategory(
       addMonths(catPeriod, -1),
@@ -160,7 +141,6 @@ export default function Analysis() {
       color: c.category?.color ?? chartColors[i % chartColors.length],
     }));
 
-  /* Patrimonio */
   const nw = useMemo(
     () => netWorthSeries(nwPeriods, f.accounts, f.transactions, (p) => market.rateFor(p)),
     [nwPeriods, f.accounts, f.transactions, market],
@@ -173,14 +153,12 @@ export default function Analysis() {
   }));
   const nwMin = Math.min(0, ...nwData.map((d) => d.value));
   const nwScale = nwMin < 0 ? {} : niceScale(Math.max(1, ...nwData.map((d) => d.value)), 3);
-  // Margen a los costados para que las fechas de las puntas no se corten
   const NW_EDGE = 22;
   const nwLast = nw[nw.length - 1];
   const nwFirst = nw.find((n) => n.ars !== 0) ?? nw[0];
   const nwDelta =
     nwLast && nwFirst ? (nwCur === 'USD' ? nwLast.usd - nwFirst.usd : nwLast.ars - nwFirst.ars) : 0;
 
-  /* Proyección */
   const proj = useMemo(
     () => projection(addMonths(now, 1), 6, f.recurring, f.purchases, f.cards, conv),
     [now, f.recurring, f.purchases, f.cards, conv],
@@ -212,7 +190,6 @@ export default function Analysis() {
   });
   const projScale = niceScale(projMax / 100, 4);
 
-  // Qué cuotas terminan en cada mes (para explicar las bajas del gráfico)
   const endsBy = new Map();
   for (const p of f.purchases) {
     const pr = purchaseProgress(p);
@@ -223,7 +200,6 @@ export default function Analysis() {
   }
   const listNames = (arr) =>
     arr.length <= 2 ? arr.join(' y ') : `${arr.slice(0, 2).join(', ')} y ${arr.length - 2} más`;
-  // Meses en que lo comprometido baja porque termina alguna cuota
   const drops = proj
     .map((r, i) => {
       const prev = i === 0 ? null : proj[i - 1];
@@ -281,7 +257,6 @@ export default function Analysis() {
         ]}
       />
 
-      {/* Números clave, en una sola tarjeta */}
       <View style={styles.kpis}>
         {isMonth ? (
           <>
@@ -395,7 +370,6 @@ export default function Analysis() {
               </Block>
             ) : null}
 
-            {/* Inflación: solo al comparar meses, donde cambia la lectura */}
             {!isMonth ? (
               <View style={{ marginTop: space.md }}>
                 <Group>
@@ -420,7 +394,6 @@ export default function Analysis() {
                   </Text>
                 ) : (
                   <>
-                    {/* Total o el mes tocado */}
                     <View style={styles.projHead}>
                       <View style={{ flex: 1 }}>
                         <Text variant="bodySmall" style={{ color: palette.textSecondary }}>
@@ -649,7 +622,6 @@ export default function Analysis() {
   );
 }
 
-/** Sección con rótulo en mayúscula (igual que el resto de la app) */
 function Block({ label, children }) {
   return (
     <FadeIn delay={70} style={{ marginTop: space.xl }}>
@@ -681,7 +653,6 @@ function Insight({ icon, color = palette.textSecondary, children }) {
   );
 }
 
-/** Vista de un solo mes: barras horizontales de ingresos y gastos, y lo que queda */
 function MonthCompare({ inc, exp, save, prevAvg, pendingExp, pendingInc, fmt }) {
   const max = Math.max(inc, exp, prevAvg, 1);
   const rows = [

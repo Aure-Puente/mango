@@ -1,3 +1,4 @@
+//debts:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -12,7 +13,6 @@ import { AmountInput, ChipSelect, DateField, Group } from './fields';
 import { dialogStyle } from './finance';
 import { ActionButton, Bar, Row } from './ui';
 
-// Colores suaves para las iniciales de cada persona (siempre el mismo para el mismo nombre)
 const AVATAR_COLORS = [
   '#FF9F1C',
   '#34D1BF',
@@ -36,13 +36,11 @@ export function initials(name = '') {
   return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
 }
 
-/** "hoy", "ayer", "el 4 nov" (para armar frases sin que quede "el hoy") */
 export function onDate(d) {
   const l = dateLabel(d);
   return l === 'Hoy' || l === 'Ayer' ? l.toLowerCase() : `el ${l.toLowerCase()}`;
 }
 
-/** Círculo con las iniciales de la persona, en su color */
 export function PersonAvatar({ name, size = 40 }) {
   const c = personColor(name);
   return (
@@ -63,7 +61,6 @@ export function PersonAvatar({ name, size = 40 }) {
   );
 }
 
-/** "Vence en 4 días" / "Venció hace 2 días" / "Para el 15 dic" */
 export function debtDue(d) {
   if (!d.dueDate) return null;
   const n = daysUntil(d.dueDate);
@@ -74,11 +71,9 @@ export function debtDue(d) {
   return { text: `Para el ${dateLabel(d.dueDate).toLowerCase()}`, color: palette.textSecondary };
 }
 
-/** Fila de una deuda: persona, nota o vencimiento, lo que falta y cuánto se devolvió */
 export function DebtRow({ d, onPress }) {
   const st = debtStatus(d);
   const due = st.done ? null : debtDue(d);
-  // Una sola línea abajo: el vencimiento si hay (es lo urgente), si no la nota, si no desde cuándo
   const sub = st.done ? ['Saldada', d.note].filter(Boolean).join(' · ') : d.note || `Desde ${onDate(d.date)}`;
   return (
     <View>
@@ -101,10 +96,6 @@ export function DebtRow({ d, onPress }) {
   );
 }
 
-/**
- * Registrar un cobro (te deben) o un pago (debés), total o parcial.
- * Arranca con lo que falta; si elegís cuenta, se crea el movimiento.
- */
 export function DebtPaymentDialog({ debt, onDismiss }) {
   const { accounts, addDebtPayment, removeDebtPayment } = useData();
   const toast = useToast();

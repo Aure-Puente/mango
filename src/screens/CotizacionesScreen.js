@@ -1,3 +1,4 @@
+//CotizacionesScreen:
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -8,7 +9,6 @@ import { formatMoney, percent } from '@/lib/money';
 import { RATE_LABEL } from '@/lib/rates';
 import { palette, radius, space } from '@/theme';
 
-/** Nombre, ícono y color de cada tipo de dólar (dolarapi.com → campo "casa") */
 const TYPES = {
   oficial: { name: 'Oficial', icon: 'bank-outline', color: palette.info },
   blue: { name: 'Blue', icon: 'cash', color: palette.income },
@@ -24,7 +24,6 @@ const ars = (v) => (v ? formatMoney(Math.round(v * 100), 'ARS') : '—');
 const when = (iso) =>
   iso ? new Date(iso).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : null;
 
-/** Brecha contra el oficial: "+30%", "−1%", "≈ 0%" */
 function gapLabel(q, oficial) {
   if (!oficial?.venta || q.casa === 'oficial' || !q.venta) return null;
   const g = q.venta / oficial.venta - 1;
@@ -59,7 +58,6 @@ export default function Quotes() {
 
   return (
     <Screen refreshing={market.loading} onRefresh={market.refresh}>
-      {/* El dólar que usa la app para convertir */}
       <Card style={styles.hero}>
         <LinearGradient
           pointerEvents="none"
@@ -91,7 +89,6 @@ export default function Quotes() {
         </View>
       </Card>
 
-      {/* El resto, en columnas Compra | Venta para comparar de un vistazo */}
       <View style={styles.section}>
         <Label>Otras cotizaciones</Label>
         <Card style={{ paddingVertical: space.xs }}>

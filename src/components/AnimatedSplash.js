@@ -1,3 +1,4 @@
+//AnimatedSplash:
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
@@ -6,17 +7,14 @@ import { handoff } from '@/lib/handoff';
 import { SoftHalo } from './ui';
 import { palette } from '@/theme';
 
-/** Duración total visible de la splash si no hay destino al que viajar (incluye la del sistema) */
 const DURATION = 2100;
 const FADE_OUT = 320;
-const INTRO = 880; // brillo + hojita, antes de decidir hacia dónde va el mango
-const TRAVEL = 600; // viaje hasta el logo del login o el botón de Inicio
+const INTRO = 880;
+const TRAVEL = 600;
 const startedAt = Date.now();
 
-// Mismo dibujo y mismo encuadre que assets/splash-icon.png (y que <Logo />):
-// el primer cuadro de esta splash es idéntico a la nativa, así el paso no se nota.
 const SIZE = 160;
-const VB = 115; // lado del viewBox
+const VB = 115;
 const VIEWBOX = '-6.5 -13.5 115 115';
 const BODY =
   'M52 12 C74 12 88 32 86 55 C84 78 66 92 47 90 C27 88 14 73 16 56 C18 42 28 35 36 29 C43 24 44 12 52 12 Z';
@@ -24,37 +22,27 @@ const CHEEK = 'M30 62 C32 73 39 80 49 83';
 const LEAF = 'M55 8 C61 -1 74 -3 84 1 C80 11 68 15 55 8 Z';
 const VEIN = 'M61 7 C67 4 74 2 79 2';
 const SHADE = 'M86 55 C84 78 66 92 47 90 C63 84 76 72 79 50 Z';
-const BODY_LEN = 231; // largo del contorno, para el brillo que lo recorre
-const SHINE = 34; // largo del brillo
-// El botón de Inicio dibuja la parte del viewBox que va de y = -5 a y = 92 (97 de alto)
+const BODY_LEN = 231;
+const SHINE = 34;
 const FAB_SPAN = 97;
 
-// La hoja gira desde el tallo: (55, 8) dentro del viewBox
 const LEAF_ORIGIN = `${((55 + 6.5) / 115) * 100}% ${((8 + 13.5) / 115) * 100}%`;
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const ease = Easing.bezier(0.65, 0, 0.25, 1);
 
-/**
- * Splash animada, continuación de la nativa (mismo fondo, mismo logo, mismo tamaño):
- * 1. un brillo recorre el contorno del mango y la hojita se mece, con un halo suave detrás;
- * 2. el mango viaja a la primera pantalla:
- *    - al login: se achica hasta el lugar del logo mientras aparece el formulario;
- *    - a Inicio: se rellena, se achica y baja hasta la esquina del botón mango;
- *    - si no hay destino a tiempo: se achica, aparece "mango" debajo y todo se desvanece.
- */
 export function AnimatedSplash({ onDone }) {
   const [hidden, setHidden] = useState(false);
   const markRef = useRef(null);
   const [v] = useState(() => ({
-    shine: new Animated.Value(0), // recorrido del brillo (JS: anima strokeDashoffset)
+    shine: new Animated.Value(0),
     leaf: new Animated.Value(0),
     glow: new Animated.Value(0),
-    bg: new Animated.Value(1), // fondo de la splash (se va para mostrar la pantalla de abajo)
+    bg: new Animated.Value(1),
     tx: new Animated.Value(0),
     ty: new Animated.Value(0),
     sc: new Animated.Value(1),
-    fill: new Animated.Value(0), // 0 contorno → 1 relleno (como el botón de Inicio)
+    fill: new Animated.Value(0),
     name: new Animated.Value(0),
     mark: new Animated.Value(1),
   }));
@@ -68,12 +56,10 @@ export function AnimatedSplash({ onDone }) {
   const timing = (val, toValue, duration, delay = 0) =>
     Animated.timing(val, { toValue, duration, delay, easing: ease, useNativeDriver: true });
 
-  /** Viaje hasta el destino medido */
   const travel = (kind, to, me) => {
     const unit = SIZE / VB;
     const scale = kind === 'fab' ? to.h / (FAB_SPAN * unit) : to.w / SIZE;
     const dx = to.x + to.w / 2 - (me.x + me.w / 2);
-    // El botón se centra en su propio recorte del dibujo (medio punto más arriba que el cuadro)
     const dy = to.y + to.h / 2 - (me.y + me.h / 2) + (kind === 'fab' ? 0.5 * unit * scale : 0);
     Animated.parallel([
       timing(v.tx, dx, TRAVEL),
@@ -82,7 +68,6 @@ export function AnimatedSplash({ onDone }) {
       timing(v.bg, 0, TRAVEL * 0.75, TRAVEL * 0.2),
       kind === 'fab' ? timing(v.fill, 1, TRAVEL * 0.6, TRAVEL * 0.1) : timing(v.fill, 0, 1),
     ]).start(() => {
-      // Llegó: aparece el de verdad y, en el cuadro siguiente, se va el de la splash
       handoff.finish();
       requestAnimationFrame(() => {
         setHidden(true);
@@ -91,7 +76,6 @@ export function AnimatedSplash({ onDone }) {
     });
   };
 
-  /** Sin destino: la salida de siempre */
   const fallback = () => {
     Animated.parallel([timing(v.sc, 0.72, 520), timing(v.ty, -30, 520), timing(v.name, 1, 520)]).start();
     const remaining = Math.max(520, DURATION - (Date.now() - startedAt) - FADE_OUT);
@@ -100,7 +84,6 @@ export function AnimatedSplash({ onDone }) {
     }, remaining);
   };
 
-  /** Busca el destino (espera un poquito si la pantalla todavía se está armando) */
   const decide = (tries = 0) => {
     const target = handoff.target();
     if (!target) {
@@ -151,18 +134,15 @@ export function AnimatedSplash({ onDone }) {
   const outline = v.fill.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
   const nameY = v.name.interpolate({ inputRange: [0, 1], outputRange: [14, 0] });
   const leafRotate = v.leaf.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-14deg'] });
-  // El brillo da una vuelta completa al contorno y se apaga al final
   const dashOffset = v.shine.interpolate({ inputRange: [0, 1], outputRange: [0, -BODY_LEN] });
   const shineOpacity = v.shine.interpolate({ inputRange: [0, 0.1, 0.85, 1], outputRange: [0, 1, 1, 0] });
   const move = [{ translateX: v.tx }, { translateY: v.ty }, { scale: v.sc }];
 
   return (
     <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.wrap]}>
-      {/* Fondo: se desvanece para dejar ver la pantalla de abajo */}
       <Animated.View style={[StyleSheet.absoluteFill, styles.bg, { opacity: v.bg }]} />
 
       <View style={styles.center}>
-        {/* Halo cálido detrás del mango */}
         <Animated.View style={[styles.glow, { opacity: Animated.multiply(v.glow, v.bg), transform: move }]}>
           <SoftHalo size={360} />
         </Animated.View>
@@ -172,7 +152,6 @@ export function AnimatedSplash({ onDone }) {
           collapsable={false}
           style={{ width: SIZE, height: SIZE, opacity: v.mark, transform: move }}
         >
-          {/* Contorno + brillo que lo recorre */}
           <Animated.View style={[StyleSheet.absoluteFill, { opacity: outline }]}>
             <Svg width={SIZE} height={SIZE} viewBox={VIEWBOX}>
               <G fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -189,14 +168,12 @@ export function AnimatedSplash({ onDone }) {
               </G>
             </Svg>
           </Animated.View>
-          {/* Relleno (aparece solo camino al botón de Inicio) */}
           <Animated.View style={[StyleSheet.absoluteFill, { opacity: v.fill }]}>
             <Svg width={SIZE} height={SIZE} viewBox={VIEWBOX}>
               <Path d={BODY} fill={palette.primary} />
               <Path d={SHADE} fill="#F08A00" />
             </Svg>
           </Animated.View>
-          {/* La hoja va aparte para poder mecerla desde el tallo */}
           <Animated.View
             style={[
               StyleSheet.absoluteFill,
@@ -245,7 +222,6 @@ const styles = StyleSheet.create({
     marginLeft: -180,
     marginTop: -180,
   },
-  // Debajo del mango ya achicado y subido (160 × 0.72 ≈ 115 px, 30 px más arriba)
   name: {
     position: 'absolute',
     left: 0,

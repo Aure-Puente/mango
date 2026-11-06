@@ -1,9 +1,7 @@
+//finance:
 import { addMonths, dateInPeriod, monthsBetween, parsePeriod, periodOf, periodRange } from './dates';
 import { splitEven } from './money';
 
-/* ---------- Conversión ---------- */
-
-/** Crea un conversor a la moneda de visualización */
 export function makeConverter(display, currentRate) {
   return (cents, currency, rateHint) => {
     if (currency === display) return cents;
@@ -13,13 +11,6 @@ export function makeConverter(display, currentRate) {
   };
 }
 
-/* ---------- Tarjetas y cuotas ---------- */
-
-/**
- * Período en que se paga una compra con tarjeta.
- * Si la compra es después del cierre, entra en el resumen siguiente.
- * Si el vencimiento es "antes" que el cierre (ej: cierra 25, vence 5), se paga el mes siguiente.
- */
 export function cardFirstPeriod(card, purchaseDate) {
   const day = Number(purchaseDate.slice(8, 10));
   let closePeriod = periodOf(purchaseDate);
@@ -27,7 +18,6 @@ export function cardFirstPeriod(card, purchaseDate) {
   return card.dueDay > card.closingDay ? closePeriod : addMonths(closePeriod, 1);
 }
 
-/** Cronograma de cuotas, con la cancelación anticipada agrupada */
 export function installmentSchedule(p) {
   const amounts = splitEven(p.total, p.installments);
   const all = amounts.map((amount, i) => ({ numbers: [i + 1], period: addMonths(p.firstPeriod, i), amount }));
@@ -57,8 +47,6 @@ export function purchaseProgress(p) {
   return { paidCount, total: p.installments, remaining, lastPeriod, done: paidCount >= p.installments };
 }
 
-/* ---------- Recurrentes ---------- */
-
 export function recurringApplies(r, period) {
   if (period < r.startPeriod) return false;
   if (r.endPeriod && period > r.endPeriod) return false;
@@ -68,13 +56,10 @@ export function recurringApplies(r, period) {
   return true;
 }
 
-/** Cuántas veces se repite un fijo con fin (ej: "cuota 3 de 6") */
 export function recurringIndex(r, period) {
   if (!r.endPeriod) return null;
   return { n: monthsBetween(r.startPeriod, period) + 1, of: monthsBetween(r.startPeriod, r.endPeriod) + 1 };
 }
-
-/* ---------- Compromisos del mes ---------- */
 
 export function commitmentsFor(period, recurring, purchases, cards) {
   const out = [];
@@ -131,8 +116,6 @@ export function commitmentsFor(period, recurring, purchases, cards) {
   return out.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 }
 
-/* ---------- Saldos ---------- */
-
 export function accountBalances(accounts, txs, until) {
   const bal = {};
   for (const a of accounts) bal[a.id] = a.initialBalance ?? 0;
@@ -147,8 +130,6 @@ export function accountBalances(accounts, txs, until) {
   }
   return bal;
 }
-
-/* ---------- Resumen mensual ---------- */
 
 export function txInPeriod(txs, period) {
   return txs.filter((t) => t.date.startsWith(period));
@@ -194,7 +175,6 @@ export function spendingByCategory(period, txs, categories, conv, displayCurrenc
   for (const c of categories) {
     if (c.kind !== 'expense') continue;
     const amount = map.get(c.id) ?? 0;
-    // El presupuesto se guarda en pesos
     const budget = c.budget
       ? displayCurrency === 'ARS'
         ? c.budget
@@ -211,9 +191,6 @@ export function spendingByCategory(period, txs, categories, conv, displayCurrenc
   return rows.sort((a, b) => b.amount - a.amount);
 }
 
-/* ---------- Proyección ---------- */
-
-/** Lo que ya está comprometido en los próximos meses (fijos + cuotas) */
 export function projection(from, months, recurring, purchases, cards, conv) {
   return periodRange(from, addMonths(from, months - 1)).map((period) => {
     const cs = commitmentsFor(period, recurring, purchases, cards);
@@ -230,8 +207,6 @@ export function projection(from, months, recurring, purchases, cards, conv) {
   });
 }
 
-/* ---------- Patrimonio ---------- */
-
 export function netWorthSeries(periods, accounts, txs, rateFor) {
   return periods.map((p) => {
     const end = dateInPeriod(p, 31);
@@ -246,9 +221,6 @@ export function netWorthSeries(periods, accounts, txs, rateFor) {
   });
 }
 
-/* ---------- Gasto excesivo ---------- */
-
-/** Compara el gasto del mes (real + comprometido) contra el promedio de los 3 meses anteriores */
 export function spendingInsight(current, previous) {
   const prev = previous.filter((v) => v > 0);
   if (prev.length === 0) return null;
@@ -257,16 +229,12 @@ export function spendingInsight(current, previous) {
   return { level: ratio > 1.25 ? 'high' : ratio > 1.1 ? 'warn' : 'ok', ratio, average };
 }
 
-/* ---------- Deudas y préstamos ---------- */
-
-/** Cuánto se devolvió, cuánto falta y si ya está saldada */
 export function debtStatus(d) {
   const paid = (d.payments ?? []).reduce((s, p) => s + p.amount, 0);
   const pending = Math.max(0, d.amount - paid);
   return { paid, pending, done: pending === 0, ratio: d.amount ? Math.min(1, paid / d.amount) : 0 };
 }
 
-/** Totales pendientes por dirección, convertidos con `conv` */
 export function debtTotals(debts, conv) {
   const t = { owed: 0, owe: 0, owedCount: 0, oweCount: 0 };
   for (const d of debts) {

@@ -1,3 +1,4 @@
+//MarketContext:
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AppState } from 'react-native';
 import { currentPeriod } from '@/lib/dates';

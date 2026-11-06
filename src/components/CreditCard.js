@@ -1,3 +1,4 @@
+//CreditCard:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
@@ -7,7 +8,6 @@ import { Pill, PressableScale } from './ui';
 
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
-/** Tarjeta de crédito dibujada: fondo oscuro con el color elegido, chip y datos de cierre */
 export function CreditCard({ card, active, onPress }) {
   const color = card.color ?? palette.primary;
   return (
@@ -19,7 +19,6 @@ export function CreditCard({ card, active, onPress }) {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      {/* Brillo diagonal suave */}
       <LinearGradient
         colors={['rgba(255,255,255,0.08)', 'rgba(255,255,255,0)']}
         start={{ x: 0, y: 0 }}

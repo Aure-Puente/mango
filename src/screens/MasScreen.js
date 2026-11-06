@@ -1,3 +1,4 @@
+//MasScreen:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { StyleSheet, View } from 'react-native';
@@ -11,10 +12,8 @@ import { debtTotals } from '@/lib/finance';
 import { navigate } from '@/navigation/RootNavigation';
 import { palette, radius, space } from '@/theme';
 
-/** "1 tarjeta" / "3 tarjetas" */
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
-/** Lista corta de nombres: "Mercado Pago y 3 más" */
 function namesSummary(names, max = 2) {
   if (names.length <= max) return names.join(', ');
   return `${names.slice(0, max).join(', ')} y ${names.length - max} más`;

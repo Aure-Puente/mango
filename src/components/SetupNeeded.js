@@ -1,10 +1,10 @@
+//SetupNeeded:
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette, radius, space } from '@/theme';
 import { Logo } from './Logo';
 
-/** Se muestra si falta el archivo .env con la configuración de Firebase */
 export function SetupNeeded() {
   const insets = useSafeAreaInsets();
   return (

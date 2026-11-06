@@ -1,3 +1,4 @@
+//MangoFab:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
@@ -7,27 +8,21 @@ import Svg, { Path } from 'react-native-svg';
 import { useHandoffTarget } from '@/lib/handoff';
 import { palette, radius, space } from '@/theme';
 
-// Silueta del logo (la misma de los títulos), rellena. viewBox ajustado al dibujo con la hoja.
 const VIEWBOX = '14 -5 74 97';
-const H = 70; // alto del mango
-const W = Math.round((H * 74) / 97); // ≈ 53
+const H = 70;
+const W = Math.round((H * 74) / 97);
 const BODY =
   'M52 12 C74 12 88 32 86 55 C84 78 66 92 47 90 C27 88 14 73 16 56 C18 42 28 35 36 29 C43 24 44 12 52 12 Z';
 const LEAF = 'M55 8 C61 -1 74 -3 84 1 C80 11 68 15 55 8 Z';
-const PLUS = 17; // largo de cada barra del +
-const PLUS_W = 2.4; // grosor: fino, como grabado en la fruta
-const PLUS_COLOR = '#A3580A'; // naranja tostado (opaco: si fuera transparente, el cruce se vería más oscuro)
-const SHADE = 'M86 55 C84 78 66 92 47 90 C63 84 76 72 79 50 Z'; // sombra suave abajo a la derecha
-// La hoja gira desde el tallo (55, 8)
+const PLUS = 17;
+const PLUS_W = 2.4;
+const PLUS_COLOR = '#A3580A';
+const SHADE = 'M86 55 C84 78 66 92 47 90 C63 84 76 72 79 50 Z';
 const LEAF_ORIGIN = `${((55 - 14) / 74) * 100}% ${((8 + 5) / 97) * 100}%`;
 
-/**
- * Estado compartido del menú abierto, para que la barra de pestañas (que está por encima de la
- * pantalla) se oscurezca junto con el resto y cierre el menú si la tocan. Ver <FabDim /> en TabBar.
- */
 const BACKDROP = 'rgba(11,11,13,0.9)';
 export const fabOverlay = {
-  progress: new Animated.Value(0), // 0 cerrado → 1 abierto
+  progress: new Animated.Value(0),
   close: () => {},
   open: false,
   listeners: new Set(),
@@ -38,7 +33,6 @@ function setOverlayOpen(open, close) {
   fabOverlay.listeners.forEach((fn) => fn(open));
 }
 
-/** Capa oscura para poner sobre la barra de pestañas mientras el menú del mango está abierto */
 export function FabDim() {
   const [open, setOpen] = useState(fabOverlay.open);
   useEffect(() => {
@@ -59,29 +53,19 @@ export function FabDim() {
   );
 }
 
-/**
- * Botón flotante con forma de mango (la silueta del logo, rellena), sin +.
- * Al tocarlo se inclina, la hoja se mece y aparece una × adentro; se abre el menú con las acciones.
- * Un borde del color del fondo lo recorta del contenido, en vez de una sombra rectangular.
- *
- * @param {{ actions: { icon: string, label: string, color: string, onPress: () => void }[] }} props
- */
 export function MangoFab({ actions }) {
   const [open, setOpen] = useState(false);
-  // Al abrir la app, el mango de la splash viaja hasta acá; mientras tanto este queda oculto
   const [handRef, handVisible] = useHandoffTarget('fab');
-  const [progress] = useState(() => new Animated.Value(0)); // 0 cerrado → 1 abierto
-  const [press] = useState(() => new Animated.Value(0)); // 0 suelto → 1 presionado
+  const [progress] = useState(() => new Animated.Value(0));
+  const [press] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     const cfg = { toValue: open ? 1 : 0, useNativeDriver: true, damping: 18, stiffness: 210 };
     Animated.spring(progress, cfg).start();
-    // La barra de pestañas se oscurece con la misma animación
     Animated.spring(fabOverlay.progress, cfg).start();
     setOverlayOpen(open, () => setOpen(false));
   }, [open, progress]);
 
-  // Si la pantalla se va con el menú abierto, la barra no queda oscurecida
   useEffect(
     () => () => {
       fabOverlay.progress.setValue(0);
@@ -90,7 +74,6 @@ export function MangoFab({ actions }) {
     [],
   );
 
-  // En Android, el botón "atrás" cierra el menú en vez de salir de la pantalla
   useEffect(() => {
     if (!open) return undefined;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -121,7 +104,6 @@ export function MangoFab({ actions }) {
     progress.interpolate({ inputRange: [0, 1], outputRange: [0, 14] }),
   ).interpolate({ inputRange: [-30, 30], outputRange: ['-30deg', '30deg'] });
   const closeScale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
-  // El + gira y se desvanece mientras aparece la ×
   const plusOpacity = progress.interpolate({
     inputRange: [0, 0.5],
     outputRange: [1, 0],
@@ -130,7 +112,6 @@ export function MangoFab({ actions }) {
   const plusRotate = progress.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '90deg'] });
   return (
     <>
-      {/* Fondo oscuro detrás del menú */}
       <Animated.View
         pointerEvents={open ? 'auto' : 'none'}
         style={[StyleSheet.absoluteFill, styles.backdrop, { opacity: progress }]}
@@ -139,11 +120,10 @@ export function MangoFab({ actions }) {
       </Animated.View>
 
       <View pointerEvents="box-none" style={styles.anchor}>
-        {/* Acciones (de abajo hacia arriba, entran escalonadas) */}
         <View pointerEvents={open ? 'box-none' : 'none'} style={styles.actions}>
           {actions.map((a, i) => {
             const n = actions.length;
-            const delay = (n - 1 - i) / (n + 1); // la más cercana al botón aparece primero
+            const delay = (n - 1 - i) / (n + 1);
             const t = progress.interpolate({
               inputRange: [delay * 0.6, Math.min(1, delay * 0.6 + 0.55)],
               outputRange: [0, 1],
@@ -180,7 +160,6 @@ export function MangoFab({ actions }) {
           })}
         </View>
 
-        {/* El mango */}
         <Pressable
           onPress={toggle}
           onPressIn={() => pressTo(1)}
@@ -202,7 +181,6 @@ export function MangoFab({ actions }) {
             }}
           >
             <Svg width={W} height={H} viewBox={VIEWBOX} style={StyleSheet.absoluteFill}>
-              {/* Borde del color del fondo: lo despega del contenido que pasa por debajo */}
               <Path d={BODY} fill={palette.background} stroke={palette.background} strokeWidth={9} />
               <Path d={BODY} fill={palette.primary} />
               <Path d={SHADE} fill="#F08A00" />
@@ -218,14 +196,12 @@ export function MangoFab({ actions }) {
                 <Path d={LEAF} fill={palette.income} />
               </Svg>
             </Animated.View>
-            {/* Cerrado: un + sutil, naranja tostado, que se funde con la fruta */}
             <Animated.View pointerEvents="none" style={[styles.close, { opacity: plusOpacity }]}>
               <Animated.View style={[styles.plus, { transform: [{ rotate: plusRotate }] }]}>
                 <View style={styles.plusH} />
                 <View style={styles.plusV} />
               </Animated.View>
             </Animated.View>
-            {/* Abierto: una × adentro para cerrar */}
             <Animated.View
               pointerEvents="none"
               style={[styles.close, { opacity: progress, transform: [{ scale: closeScale }] }]}
@@ -282,7 +258,6 @@ const styles = StyleSheet.create({
     borderRadius: PLUS_W / 2,
     backgroundColor: PLUS_COLOR,
   },
-  // Centrada en la panza del mango (un poco abajo y a la izquierda del centro del dibujo)
   close: {
     position: 'absolute',
     left: 0,

@@ -1,3 +1,4 @@
+//CompraScreen:
 import { useRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
@@ -46,16 +47,13 @@ export default function PurchaseForm() {
   const card = cards.find((c) => c.id === cardId);
   const cat = categories.find((c) => c.id === categoryId);
 
-  // Solo cuentas en la moneda de la compra (las cuotas se registran en esa moneda)
   const accountOptions = accounts.filter((a) => !a.archived && a.currency === currency);
   const validAccount = accountOptions.some((a) => a.id === accountId) ? accountId : null;
 
-  // Con tarjeta, la primera cuota se calcula según cierre y vencimiento
   useEffect(() => {
     if (kind === 'card' && card) setFirstPeriod(cardFirstPeriod(card, date));
   }, [kind, card, date]);
 
-  // Si es una compra vieja, sugerimos cuántas cuotas ya pasaron
   useEffect(() => {
     if (existing) return;
     const passed = Math.max(0, Math.min(installments, monthsDiff(firstPeriod, currentPeriod())));
@@ -117,7 +115,6 @@ export default function PurchaseForm() {
     <>
       <ScreenOptions options={{ title: existing ? 'Editar compra' : 'Compra en cuotas' }} />
       <FormScreen onSave={submit} saving={saving}>
-        {/* Vista previa: así se ve en Cuotas */}
         <Card style={styles.preview}>
           <View style={styles.previewRow}>
             <IconBubble icon={source.icon} color={color} />
@@ -167,7 +164,6 @@ export default function PurchaseForm() {
           </View>
         </Card>
 
-        {/* Monto */}
         <Segmented
           value={mode}
           onChange={setMode}
@@ -212,7 +208,6 @@ export default function PurchaseForm() {
           placeholder="Ej: Heladera, notebook, zapatillas"
         />
 
-        {/* Cómo se paga */}
         <View style={{ gap: space.sm }}>
           <Label>¿Cómo se paga?</Label>
           <Segmented
@@ -276,7 +271,6 @@ export default function PurchaseForm() {
           />
         </View>
 
-        {/* Cuándo */}
         <View style={{ gap: space.sm }}>
           <Label>Cuándo</Label>
           <Group>
@@ -323,7 +317,6 @@ export default function PurchaseForm() {
 
 const lower = (s) => s.toLowerCase();
 
-/** Aclaración chica con ícono debajo de un campo */
 function Hint({ icon, color = palette.textSecondary, children }) {
   return (
     <View style={styles.hint}>

@@ -1,13 +1,8 @@
+//useAppUpdates:
 import * as Updates from 'expo-updates';
 import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AppState } from 'react-native';
 
-/**
- * Actualizaciones automáticas (OTA) con EAS Update.
- * Al abrir la app y al volver a primer plano busca una versión nueva;
- * si hay, la descarga en segundo plano y ofrece reiniciar.
- * Publicás cambios con: npm run update
- */
 function useUpdatesState() {
   const [status, setStatus] = useState('idle');
 
