@@ -6,7 +6,7 @@ import { Children, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   Pressable,
   RefreshControl,
@@ -253,11 +253,29 @@ export function Columns({ left, right }) {
 
 export function FormScreen({ children, onSave, saveLabel = 'Guardar', saving, disabled, extraAction }) {
   const insets = useSafeAreaInsets();
+  const box = useRef(null);
+  const [kb, setKb] = useState(0);
+
+  useEffect(() => {
+    const ios = Platform.OS === 'ios';
+    const show = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
+      const top = e.endCoordinates.screenY;
+      const node = box.current;
+      if (!node?.measureInWindow) return setKb(e.endCoordinates.height);
+      node.measureInWindow((x, y, w, h) => setKb(Math.max(0, y + h - top)));
+    });
+    const hide = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', () => setKb(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: palette.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    <View
+      ref={box}
+      collapsable={false}
+      style={{ flex: 1, backgroundColor: palette.background, paddingBottom: kb }}
     >
       <ScrollView
         contentContainerStyle={{ padding: space.lg, paddingTop: space.md, paddingBottom: space.xxl }}
@@ -268,7 +286,7 @@ export function FormScreen({ children, onSave, saveLabel = 'Guardar', saving, di
           {children}
         </View>
       </ScrollView>
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space.lg) }]}>
+      <View style={[styles.footer, { paddingBottom: kb ? space.md : Math.max(insets.bottom, space.lg) }]}>
         <View
           style={{
             flexDirection: 'row',
@@ -292,7 +310,7 @@ export function FormScreen({ children, onSave, saveLabel = 'Guardar', saving, di
           </Button>
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
