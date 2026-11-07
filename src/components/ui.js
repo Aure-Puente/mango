@@ -1,7 +1,8 @@
 //ui:
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Children, useEffect, useRef, useState } from 'react';
+import { Children, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -65,6 +66,17 @@ export function StatusBarScrim({ fade = 18 }) {
     <View pointerEvents="none" style={styles.scrim}>
       <View style={{ height: insets.top, backgroundColor: palette.background }} />
       <LinearGradient colors={[palette.background, palette.background + '00']} style={{ height: fade }} />
+    </View>
+  );
+}
+
+export function NavBarScrim({ fade = 18 }) {
+  const insets = useSafeAreaInsets();
+  if (!insets.bottom) return null;
+  return (
+    <View pointerEvents="none" style={styles.navScrim}>
+      <LinearGradient colors={[palette.background + '00', palette.background]} style={{ height: fade }} />
+      <View style={{ height: insets.bottom, backgroundColor: palette.background }} />
     </View>
   );
 }
@@ -151,33 +163,38 @@ export function SkeletonRows({ count = 4 }) {
 export function Screen({ title, subtitle, right, children, refreshing, onRefresh, bottomInset = 0, wide }) {
   const insets = useSafeAreaInsets();
   const { max } = useLayout(wide);
+  const inTabs = useContext(BottomTabBarHeightContext) !== undefined;
+  const navBar = inTabs ? 0 : insets.bottom;
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: palette.background }}
-      contentContainerStyle={{
-        paddingTop: title ? insets.top + space.lg : space.lg,
-        paddingHorizontal: space.lg,
-        paddingBottom: space.xxl + bottomInset,
-      }}
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl
-            refreshing={!!refreshing}
-            onRefresh={onRefresh}
-            tintColor={palette.primary}
-            colors={[palette.primary]}
-            progressBackgroundColor={palette.surface}
-          />
-        ) : undefined
-      }
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <FadeIn style={{ width: '100%', maxWidth: max, alignSelf: 'center' }}>
-        {title ? <ScreenTitle title={title} subtitle={subtitle} right={right} /> : null}
-        {children}
-      </FadeIn>
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: palette.background }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        contentContainerStyle={{
+          paddingTop: title ? insets.top + space.lg : space.lg,
+          paddingHorizontal: space.lg,
+          paddingBottom: space.xxl + bottomInset + navBar,
+        }}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={!!refreshing}
+              onRefresh={onRefresh}
+              tintColor={palette.primary}
+              colors={[palette.primary]}
+              progressBackgroundColor={palette.surface}
+            />
+          ) : undefined
+        }
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <FadeIn style={{ width: '100%', maxWidth: max, alignSelf: 'center' }}>
+          {title ? <ScreenTitle title={title} subtitle={subtitle} right={right} /> : null}
+          {children}
+        </FadeIn>
+      </ScrollView>
+      {navBar ? <NavBarScrim /> : null}
+    </View>
   );
 }
 
@@ -568,6 +585,7 @@ export function withDividers(children) {
 }
 
 export const styles = StyleSheet.create({
+  navScrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: space.xl, gap: space.sm },
   card: {
     backgroundColor: palette.surface,

@@ -15,6 +15,7 @@ import {
   IconBubble,
   Label,
   Pill,
+  PressableScale,
   Row,
   Screen,
   Skeleton,
@@ -26,7 +27,7 @@ import { addMonths, currentPeriod, periodLabel, today } from '@/lib/dates';
 import { purchaseProgress, recurringApplies } from '@/lib/finance';
 import { formatMoney } from '@/lib/money';
 import { navigate } from '@/navigation/RootNavigation';
-import { palette, space } from '@/theme';
+import { palette, radius, space } from '@/theme';
 
 const DATA_KEYS = ['recurring', 'purchases', 'cards'];
 
@@ -228,29 +229,37 @@ function MonthView() {
         return (
           <Block key={card.id} label={card.name}>
             <Card style={{ paddingVertical: space.xs }}>
-              <View style={styles.cardHead}>
-                <IconBubble icon="credit-card-outline" color={card.color ?? palette.primary} size={36} />
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text variant="bodySmall" style={{ color: due.color }}>
-                    Resumen · {due.text.toLowerCase()}
-                  </Text>
-                  <Text variant="titleLarge" style={styles.num} numberOfLines={1} adjustsFontSizeToFit>
-                    {groups.map((g) => formatMoney(sumBy(g.items, g.cur), g.cur)).join(' + ')}
-                  </Text>
+              <View style={styles.cardSummary}>
+                <View style={styles.cardHead}>
+                  <IconBubble icon="credit-card-outline" color={card.color ?? palette.primary} size={36} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text variant="bodySmall" style={{ color: due.color }}>
+                      Resumen · {due.text.toLowerCase()}
+                    </Text>
+                    <Text variant="titleLarge" style={styles.num} numberOfLines={1} adjustsFontSizeToFit>
+                      {groups.map((g) => formatMoney(sumBy(g.items, g.cur), g.cur)).join(' + ')}
+                    </Text>
+                  </View>
                 </View>
-                {groups.map((g) => (
-                  <SmallButton
-                    key={g.cur}
-                    variant="solid"
-                    label={`Pagar${groups.length > 1 ? ` ${g.cur}` : ''}`}
-                    onPress={() =>
-                      setPaying({
-                        items: g.items,
-                        title: `Resumen ${card.name}${groups.length > 1 ? ` (${g.cur})` : ''}`,
-                      })
-                    }
-                  />
-                ))}
+                <View style={styles.payRow}>
+                  {groups.map((g, i) => (
+                    <PayButton
+                      key={g.cur}
+                      primary={i === 0}
+                      label={
+                        groups.length > 1
+                          ? `Pagar ${formatMoney(sumBy(g.items, g.cur), g.cur, { compact: true })}`
+                          : 'Pagar resumen'
+                      }
+                      onPress={() =>
+                        setPaying({
+                          items: g.items,
+                          title: `Resumen ${card.name}${groups.length > 1 ? ` (${g.cur})` : ''}`,
+                        })
+                      }
+                    />
+                  ))}
+                </View>
               </View>
               {cs.map((c) => (
                 <View key={c.key}>
@@ -648,6 +657,31 @@ function TabSkeleton({ tab }) {
   );
 }
 
+function PayButton({ label, onPress, primary }) {
+  return (
+    <PressableScale
+      onPress={onPress}
+      scaleTo={0.96}
+      accessibilityRole="button"
+      containerStyle={{ flex: 1 }}
+      style={[styles.payBtn, primary ? styles.payBtnPrimary : styles.payBtnSecondary]}
+    >
+      <MaterialCommunityIcons
+        name="check"
+        size={16}
+        color={primary ? palette.onPrimary : palette.primary}
+      />
+      <Text
+        variant="labelLarge"
+        numberOfLines={1}
+        style={{ color: primary ? palette.onPrimary : palette.text, fontFamily: 'Inter_600SemiBold' }}
+      >
+        {label}
+      </Text>
+    </PressableScale>
+  );
+}
+
 const styles = StyleSheet.create({
   hero: { padding: space.xl, gap: space.md, overflow: 'hidden', borderColor: palette.primary + '26' },
   num: { fontVariant: ['tabular-nums'] },
@@ -674,7 +708,24 @@ const styles = StyleSheet.create({
   section: { marginTop: space.xl },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   toggle: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  cardHead: { flexDirection: 'row', alignItems: 'center', paddingVertical: space.md, gap: space.md },
+  cardSummary: { paddingVertical: space.md, gap: space.md },
+  cardHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  payRow: { flexDirection: 'row', gap: space.sm },
+  payBtn: {
+    height: 40,
+    borderRadius: radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: space.md,
+  },
+  payBtnPrimary: { backgroundColor: palette.primary },
+  payBtnSecondary: {
+    backgroundColor: palette.surfaceHigh,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: palette.border,
+  },
   paidRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: 12 },
   thinDivider: { height: StyleSheet.hairlineWidth, backgroundColor: palette.border, marginLeft: 30 },
   progress: { marginLeft: 52, marginTop: -6, paddingBottom: space.md, gap: 6 },
