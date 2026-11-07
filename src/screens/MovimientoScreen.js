@@ -5,7 +5,7 @@ import { useRoute } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { AmountInput, ChipSelect, DateField, Field, Group, Segmented } from '@/components/fields';
+import { AmountInput, ChipSelect, DateField, Field, Group, Segmented, SwitchRow } from '@/components/fields';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { FormScreen, HeaderButton, IconBubble, Label } from '@/components/ui';
 import { useToast } from '@/context/ToastContext';
@@ -57,6 +57,7 @@ export default function TransactionForm() {
   const [method, setMethod] = useState(existing?.method ?? null);
   const [date, setDate] = useState(existing?.date ?? today());
   const [note, setNote] = useState(existing?.note ?? noteParam ?? '');
+  const [noBalance, setNoBalance] = useState(!!existing?.noBalance);
   const [saving, setSaving] = useState(false);
 
   const account = accounts.find((a) => a.id === accountId);
@@ -107,6 +108,7 @@ export default function TransactionForm() {
         note: note.trim(),
         date,
         rate: impliedRate ?? existing?.rate ?? market.rate ?? null,
+        noBalance: type !== 'transfer' && noBalance,
       };
       if (!existing) data.createdAt = Date.now();
       await save('transactions', data);
@@ -315,6 +317,15 @@ export default function TransactionForm() {
           <Label>Detalles</Label>
           <Group>
             <DateField value={date} onChange={setDate} />
+            {type !== 'transfer' ? (
+              <SwitchRow
+                icon="wallet-outline"
+                label={type === 'income' ? 'No sumar a la cuenta' : 'No descontar de la cuenta'}
+                description={type === 'income' ? 'Ya estaba cobrado' : 'Ya estaba pagado'}
+                value={noBalance}
+                onChange={setNoBalance}
+              />
+            ) : null}
           </Group>
           <Field
             label="Nota (opcional)"

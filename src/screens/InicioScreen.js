@@ -296,12 +296,14 @@ export default function Home() {
               >
                 <Card style={{ paddingVertical: space.xs }}>
                   {upcoming.length === 0 ? (
-                    <Text
-                      variant="bodyMedium"
-                      style={{ color: palette.textSecondary, paddingVertical: space.lg, textAlign: 'center' }}
-                    >
-                      {commitments.length ? 'Todo pagado este mes 🎉' : 'No tenés fijos ni cuotas cargados.'}
-                    </Text>
+                    <View style={styles.allPaid}>
+                      {commitments.length ? (
+                        <MaterialCommunityIcons name="check-circle-outline" size={17} color={palette.income} />
+                      ) : null}
+                      <Text variant="bodyMedium" style={{ color: palette.textSecondary }}>
+                        {commitments.length ? 'Todo pagado este mes' : 'No tenés fijos ni cuotas cargados.'}
+                      </Text>
+                    </View>
                   ) : (
                     upcoming.map((c, i) => (
                       <View key={c.key}>
@@ -651,6 +653,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   goalDot: { width: 8, height: 8, borderRadius: 4 },
+  allPaid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: space.lg,
+  },
   curChip: {
     flexDirection: 'row',
     alignItems: 'center',

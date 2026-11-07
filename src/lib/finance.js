@@ -121,6 +121,7 @@ export function accountBalances(accounts, txs, until) {
   for (const a of accounts) bal[a.id] = a.initialBalance ?? 0;
   for (const t of txs) {
     if (until && t.date > until) continue;
+    if (t.noBalance) continue;
     if (t.type === 'income') bal[t.accountId] = (bal[t.accountId] ?? 0) + t.amount;
     else if (t.type === 'expense') bal[t.accountId] = (bal[t.accountId] ?? 0) - t.amount;
     else if (t.type === 'transfer') {

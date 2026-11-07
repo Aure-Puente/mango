@@ -278,7 +278,7 @@ export default function PurchaseForm() {
             {kind === 'card' && card ? null : (
               <MonthStepper label="Primera cuota" value={firstPeriod} onChange={setFirstPeriod} />
             )}
-            {!existing && alreadyPaid > 0 ? (
+            {!existing ? (
               <Stepper
                 label="Cuotas ya pagadas"
                 value={alreadyPaid}
@@ -305,8 +305,8 @@ export default function PurchaseForm() {
           ) : null}
           {!existing && alreadyPaid > 0 ? (
             <Hint icon="history">
-              Como la compra es de antes, marcamos {alreadyPaid} {alreadyPaid === 1 ? 'cuota' : 'cuotas'} como
-              ya {alreadyPaid === 1 ? 'pagada' : 'pagadas'} (no se crean movimientos).
+              {alreadyPaid === 1 ? 'La primera cuota queda' : `Las primeras ${alreadyPaid} cuotas quedan`} como
+              ya {alreadyPaid === 1 ? 'pagada' : 'pagadas'}: no se crean movimientos ni cambia tu saldo.
             </Hint>
           ) : null}
         </View>

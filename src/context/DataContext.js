@@ -202,6 +202,7 @@ export function DataProvider({ children }) {
               : { kind: 'installment', purchaseId: c.refId, numbers: c.numbers ?? [] },
           createdAt: Date.now(),
         };
+        if (opts.noBalance) tx.noBalance = true;
         if (c.kind === 'recurring') {
           const rec = recurring.find((r) => r.id === c.refId);
           if (rec?.incomeKind) tx.incomeKind = rec.incomeKind;

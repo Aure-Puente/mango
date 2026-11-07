@@ -12,7 +12,7 @@ import { accountBalances } from '@/lib/finance';
 import { formatMoney } from '@/lib/money';
 import { navigate } from '@/navigation/RootNavigation';
 import { palette, radius, space } from '@/theme';
-import { ChipSelect, DateField } from './fields';
+import { ChipSelect, DateField, SwitchRow } from './fields';
 import { MangoFab } from './MangoFab';
 import { ActionButton, IconBubble, Row } from './ui';
 
@@ -86,6 +86,7 @@ export function TxRow({ tx, onPress, hideDate, compact }) {
   }
 
   const r = tx.rate || rate;
+  if (tx.noBalance && tx.type !== 'transfer') rightSub = 'fuera del saldo';
   if (!rightSub && tx.currency === 'USD' && r && settings?.displayCurrency !== 'USD') {
     rightSub = `≈ ${formatMoney(Math.round(tx.amount * r), 'ARS')}`;
   }
@@ -247,6 +248,7 @@ export function PayDialog({ items, title, onDismiss }) {
   const first = items?.[0];
   const [accountId, setAccountId] = useState(null);
   const [date, setDate] = useState(today());
+  const [noBalance, setNoBalance] = useState(false);
   const [saving, setSaving] = useState(false);
 
   if (!items || !first) return null;
@@ -304,14 +306,19 @@ export function PayDialog({ items, title, onDismiss }) {
                 onPress: () =>
                   payCommitments(
                     items.map((i) => ({ ...i, paid: false })),
-                    { accountId: prev.accountId, date: prev.date, rate: prev.rate ?? rate },
+                    {
+                      accountId: prev.accountId,
+                      date: prev.date,
+                      rate: prev.rate ?? rate,
+                      noBalance: !!prev.noBalance,
+                    },
                   ).catch(() => {}),
               }
             : undefined,
         });
       } else {
         if (!selected) return;
-        const created = await payCommitments(pending, { accountId: selected, date, rate });
+        const created = await payCommitments(pending, { accountId: selected, date, rate, noBalance });
         toast.show(isIncome ? 'Marcado como cobrado' : 'Marcado como pagado', {
           action: created?.length
             ? { label: 'Deshacer', onPress: () => revertPayments(created).catch(() => {}) }
@@ -319,6 +326,7 @@ export function PayDialog({ items, title, onDismiss }) {
         });
       }
       setAccountId(null);
+      setNoBalance(false);
       onDismiss();
     } catch (e) {
       toast.show(e instanceof Error ? e.message : 'No se pudo guardar', { tone: 'error' });
@@ -332,8 +340,8 @@ export function PayDialog({ items, title, onDismiss }) {
   if (allPaid) {
     const verb = isIncome ? 'cobro' : 'pago';
     const detail = tx
-      ? `Se ${txs.length > 1 ? `borran los ${txs.length} movimientos` : 'borra el movimiento'} de ${formatMoney(paidTotal, currency)} ${whenPaid(tx.date)}${txAcc ? ` en ${txAcc.name}` : ''} y "${name}" vuelve a quedar pendiente.`
-      : `Se borra el movimiento que se generó y "${name}" vuelve a quedar pendiente.`;
+      ? `Se ${txs.length > 1 ? `borran los ${txs.length} movimientos` : 'borra el movimiento'} de ${formatMoney(paidTotal, currency)} ${whenPaid(tx.date)}${txAcc ? ` en ${txAcc.name}` : ''} y "${name}" vuelve a quedar pendiente.${tx.noBalance ? ' No cambia ningún saldo.' : ''}`
+      : `"${name}" vuelve a quedar pendiente. No cambia ningún saldo.`;
     return (
       <Portal>
         <Dialog
@@ -434,7 +442,15 @@ export function PayDialog({ items, title, onDismiss }) {
                 color: a.color,
               }))}
             />
-            {selectedAcc && after != null ? (
+            {selectedAcc && noBalance ? (
+              <View style={styles.dialogHint}>
+                <MaterialCommunityIcons name="wallet-outline" size={15} color={palette.textDisabled} />
+                <Text variant="bodySmall" style={{ color: palette.textSecondary }}>
+                  No cambia el saldo de <Text style={{ color: palette.text }}>{selectedAcc.name}</Text>
+                </Text>
+              </View>
+            ) : null}
+            {selectedAcc && after != null && !noBalance ? (
               <View style={styles.dialogHint}>
                 <MaterialCommunityIcons
                   name={after < 0 ? 'alert-circle-outline' : 'wallet-outline'}
@@ -457,6 +473,14 @@ export function PayDialog({ items, title, onDismiss }) {
 
           <View style={styles.dialogDate}>
             <DateField value={date} onChange={setDate} />
+            <View style={styles.dialogSep} />
+            <SwitchRow
+              icon="wallet-outline"
+              label={isIncome ? 'No sumar a la cuenta' : 'No descontar de la cuenta'}
+              description={isIncome ? 'Ya estaba cobrado' : 'Ya estaba pagado'}
+              value={noBalance}
+              onChange={setNoBalance}
+            />
           </View>
         </View>
 
@@ -508,6 +532,7 @@ const styles = StyleSheet.create({
   dialogCenterBody: { alignItems: 'center', paddingHorizontal: space.xl, gap: space.sm },
   halo: { padding: 10, borderRadius: 999, marginBottom: space.sm },
   num: { fontVariant: ['tabular-nums'] },
+  dialogSep: { height: StyleSheet.hairlineWidth, backgroundColor: palette.border, marginLeft: space.lg },
   dialogDate: {
     backgroundColor: palette.surfaceHigh,
     borderRadius: radius.sm + 2,
