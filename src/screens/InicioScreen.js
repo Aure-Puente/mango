@@ -68,7 +68,15 @@ export default function Home() {
   );
 
   const name = (user?.displayName ?? '').split(' ')[0];
-  if (!ready) return <HomeSkeleton name={name} period={period} twoCol={twoCol} />;
+  if (!ready)
+    return (
+      <HomeSkeleton
+        name={name}
+        period={period}
+        twoCol={twoCol}
+        debtLines={(dt.owed ? 1 : 0) + (dt.owe ? 1 : 0)}
+      />
+    );
   const positive = summary.projected >= 0;
 
   return (
@@ -249,39 +257,23 @@ export default function Home() {
                     <MaterialCommunityIcons name="chevron-right" size={18} color={palette.textDisabled} />
                   </Pressable>
                 ) : null}
-                {dt.owed || dt.owe ? (
-                  <Pressable
-                    onPress={() => navigate('Deudas', { direction: dt.owed ? 'owed' : 'owe' })}
-                    style={({ pressed }) => [styles.quote, pressed && { opacity: 0.6 }]}
-                  >
-                    <View style={[styles.quoteDot, { backgroundColor: palette.info + '1C' }]}>
-                      <MaterialCommunityIcons name="hand-coin-outline" size={14} color={palette.info} />
-                    </View>
-                    <Text
-                      variant="bodySmall"
-                      style={{ color: palette.textSecondary, flex: 1 }}
-                      numberOfLines={1}
-                    >
-                      {dt.owed ? (
-                        <>
-                          Te deben{' '}
-                          <Text style={{ color: palette.income, fontFamily: 'Inter_600SemiBold' }}>
-                            {fmt(dt.owed, display, { compact: true })}
-                          </Text>
-                        </>
-                      ) : null}
-                      {dt.owed && dt.owe ? '  ·  ' : ''}
-                      {dt.owe ? (
-                        <>
-                          Debés{' '}
-                          <Text style={{ color: palette.text, fontFamily: 'Inter_600SemiBold' }}>
-                            {fmt(dt.owe, display, { compact: true })}
-                          </Text>
-                        </>
-                      ) : null}
-                    </Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color={palette.textDisabled} />
-                  </Pressable>
+                {dt.owed ? (
+                  <DebtLine
+                    label="Te deben"
+                    value={fmt(dt.owed, display, { compact: true })}
+                    color={palette.income}
+                    icon="hand-coin-outline"
+                    onPress={() => navigate('Deudas', { direction: 'owed' })}
+                  />
+                ) : null}
+                {dt.owe ? (
+                  <DebtLine
+                    label="Debés"
+                    value={fmt(dt.owe, display, { compact: true })}
+                    color={palette.text}
+                    icon="cash-refund"
+                    onPress={() => navigate('Deudas', { direction: 'owe' })}
+                  />
                 ) : null}
               </Block>
             </>
@@ -389,7 +381,7 @@ export default function Home() {
   );
 }
 
-function HomeSkeleton({ name, period, twoCol }) {
+function HomeSkeleton({ name, period, twoCol, debtLines = 0 }) {
   return (
     <View style={{ flex: 1 }}>
       <Screen
@@ -462,6 +454,16 @@ function HomeSkeleton({ name, period, twoCol }) {
                   <Skeleton width={64} height={14} />
                   <Skeleton width={10} height={10} radius={5} />
                 </View>
+                {Array.from({ length: debtLines }, (_, i) => (
+                  <View key={i} style={styles.quote}>
+                    <Skeleton width={22} height={22} radius={11} />
+                    <View style={{ flex: 1 }}>
+                      <Skeleton width={i ? 44 : 64} height={12} />
+                    </View>
+                    <Skeleton width={52} height={14} />
+                    <Skeleton width={10} height={10} radius={5} />
+                  </View>
+                ))}
               </View>
             </>
           }
@@ -576,6 +578,23 @@ function Stat({ label, value, color, icon }) {
         {value}
       </Text>
     </View>
+  );
+}
+
+function DebtLine({ label, value, color, icon, onPress }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.quote, pressed && { opacity: 0.6 }]}>
+      <View style={[styles.quoteDot, { backgroundColor: palette.info + '1C' }]}>
+        <MaterialCommunityIcons name={icon} size={14} color={palette.info} />
+      </View>
+      <Text variant="bodySmall" style={{ color: palette.textSecondary, flex: 1 }}>
+        {label}
+      </Text>
+      <Text variant="labelLarge" style={{ color, fontVariant: ['tabular-nums'] }}>
+        {value}
+      </Text>
+      <MaterialCommunityIcons name="chevron-right" size={18} color={palette.textDisabled} />
+    </Pressable>
   );
 }
 

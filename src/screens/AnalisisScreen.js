@@ -100,12 +100,9 @@ export default function Analysis() {
     },
     { value: m.exp / 100, frontColor: palette.expense },
   ]);
-  const saveData = chartMonths.map((m, i) => ({
+  const saveData = chartMonths.map((m) => ({
     value: m.save / 100,
     frontColor: m.save >= 0 ? palette.income : palette.expense,
-    label: showLabel(i) ? periodShort(m.p) : '',
-    labelWidth: 44,
-    labelTextStyle: axisText(),
   }));
   const barW = Math.max(
     3.5,
@@ -117,6 +114,12 @@ export default function Analysis() {
   const n = Math.max(1, chartMonths.length);
   const pairSpacing = Math.max(barW * 1.4, (chartW - 48 - n * (barW * 2 + 3)) / n);
   const saveSpacing = Math.max(barW * 1.6, (chartW - 48 - n * barW * 1.6) / n);
+  const savePos = Math.max(0, ...chartMonths.map((m) => m.save / 100));
+  const saveNeg = Math.max(0, ...chartMonths.map((m) => -m.save / 100));
+  const saveStep = niceStep((savePos + saveNeg) / 4 || 1);
+  const saveAbove = Math.max(1, Math.ceil(savePos / saveStep));
+  const saveBelow = saveNeg > 0 ? Math.ceil(saveNeg / saveStep) : 0;
+  const SAVE_SECTION = 34;
 
   const cats = useMemo(
     () => spendingByCategory(catPeriod, f.transactions, f.categories, conv, display, market.rate),
@@ -360,11 +363,35 @@ export default function Analysis() {
                     spacing={saveSpacing}
                     initialSpacing={16}
                     barBorderRadius={barW / 1.6}
-                    height={150}
-                    noOfSectionsBelowXAxis={chartMonths.some((m) => m.save < 0) ? 1 : 0}
+                    height={saveAbove * SAVE_SECTION}
+                    maxValue={saveAbove * saveStep}
+                    stepValue={saveStep}
+                    noOfSections={saveAbove}
+                    noOfSectionsBelowXAxis={saveBelow}
+                    negativeStepValue={saveStep}
+                    mostNegativeValue={-saveBelow * saveStep}
+                    xAxisLabelsHeight={0}
+                    labelsExtraHeight={0}
                     xAxisThickness={1}
+                    xAxisLength={chartW}
                     xAxisColor={palette.border}
                   />
+                  <View style={styles.saveLabels}>
+                    {chartMonths.map((m, i) =>
+                      showLabel(i) ? (
+                        <Text
+                          key={m.p}
+                          style={[
+                            axisText(),
+                            styles.saveLabel,
+                            { left: 36 + 32 + i * (barW * 1.6 + saveSpacing) + (barW * 1.6) / 2 - 22 },
+                          ]}
+                        >
+                          {periodShort(m.p)}
+                        </Text>
+                      ) : null,
+                    )}
+                  </View>
                   {fewMonths ? <FewMonths /> : null}
                 </Card>
               </Block>
@@ -743,6 +770,8 @@ function Legend({ items }) {
 }
 
 const styles = StyleSheet.create({
+  saveLabels: { height: 16, marginTop: space.xs },
+  saveLabel: { position: 'absolute', width: 44, textAlign: 'center' },
   num: { fontVariant: ['tabular-nums'] },
   hair: { height: StyleSheet.hairlineWidth, backgroundColor: palette.border },
   kpis: {

@@ -470,7 +470,6 @@ function PurchaseList() {
         const cat = categories.find((c) => c.id === p.categoryId);
         const color = card?.color ?? cat?.color ?? (p.kind === 'loan' ? palette.info : palette.primary);
         const quota = Math.round(p.total / p.installments);
-        const source = card?.name ?? (p.kind === 'loan' ? 'Préstamo' : null);
         return (
           <View key={p.id}>
             {i > 0 ? <Divider /> : null}
@@ -484,7 +483,7 @@ function PurchaseList() {
               }
               iconColor={color}
               title={p.description}
-              subtitle={`${source ? `${source} · ` : ''}${prog.paidCount} de ${prog.total} cuotas pagas`}
+              subtitle={`${prog.paidCount} de ${prog.total} cuotas pagas`}
               right={formatMoney(prog.done ? p.total : quota, p.currency)}
               rightSub={prog.done ? 'total' : 'por mes'}
               onPress={() => navigate('CompraDetalle', { id: p.id })}
