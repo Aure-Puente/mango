@@ -55,7 +55,16 @@ export function AmountInput({
           autoFocus={autoFocus}
           selectionColor={palette.primary}
           cursorColor={palette.primary}
-          style={[styles.amountInput, { color, fontSize: fs, letterSpacing: fs > 40 ? -2 : -1 }]}
+          style={[
+            styles.amountInput,
+            {
+              color,
+              fontSize: fs,
+              lineHeight: Math.round(fs * 1.2),
+              height: Math.round(size * 1.25),
+              letterSpacing: fs > 40 ? -2 : -1,
+            },
+          ]}
         />
       </View>
       {onCurrency ? (
@@ -448,7 +457,20 @@ export const CATEGORY_ICONS = [
   'school-outline',
   'book-open-variant',
   'gamepad-variant-outline',
+  'ticket-outline',
+  'popcorn',
+  'movie-open-outline',
+  'party-popper',
+  'drama-masks',
+  'palette-outline',
+  'bowling',
+  'beach',
+  'tent',
   'glass-cocktail',
+  'beer-outline',
+  'glass-mug-variant',
+  'glass-wine',
+  'bottle-wine-outline',
   'airplane',
   'gift-outline',
   'paw',
@@ -462,7 +484,6 @@ export const CATEGORY_ICONS = [
   'star-circle-outline',
   'chart-line',
   'piggy-bank-outline',
-  'beer-outline',
   'music',
   'dots-horizontal',
 ];
@@ -539,6 +560,8 @@ const styles = StyleSheet.create({
     minWidth: 48,
     letterSpacing: -2,
     padding: 0,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
     fontVariant: ['tabular-nums'],
   },
   segment: {
